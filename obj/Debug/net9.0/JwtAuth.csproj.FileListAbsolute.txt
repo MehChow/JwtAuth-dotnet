@@ -164,3 +164,4 @@ C:\Users\User\Desktop\JwtAuth\JwtAuth\obj\Debug\net9.0\refint\JwtAuth.dll
 C:\Users\User\Desktop\JwtAuth\JwtAuth\obj\Debug\net9.0\JwtAuth.pdb
 C:\Users\User\Desktop\JwtAuth\JwtAuth\obj\Debug\net9.0\JwtAuth.genruntimeconfig.cache
 C:\Users\User\Desktop\JwtAuth\JwtAuth\obj\Debug\net9.0\ref\JwtAuth.dll
+C:\Users\User\Desktop\JwtAuth\JwtAuth\obj\Debug\net9.0\JwtAuth.sourcelink.json

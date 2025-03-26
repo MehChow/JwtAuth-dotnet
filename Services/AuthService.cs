@@ -13,37 +13,35 @@ namespace JwtAuth.Services
 {
     public class AuthService(UserDbContext context, IConfiguration configuration) : IAuthService
     {
-        public async Task<TokenResponseDto?> LoginAsync(UserDto request)
+        public async Task<(TokenResponseDto? TokenResponse, string? RefreshToken)> LoginAsync(UserDto request)
         {
             var user = await context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
             if (user == null)
-            {
-                return null;
-            }
+                return (null, null);
+            
 
             if (new PasswordHasher<User>().VerifyHashedPassword(user, user.PasswordHash, request.Password) == PasswordVerificationResult.Failed)
-            {
-                return null;
-            }
+                return (null, null);
 
-            return await CreateTokenResponse(user);
+            var tokenResponse = CreateTokenResponse(user);
+            var refreshToken = await GenerateAndSaveRefreshTokenAsync(user);
+
+            return (tokenResponse, refreshToken);
         }
 
-        private async Task<TokenResponseDto> CreateTokenResponse(User user)
+        private TokenResponseDto CreateTokenResponse(User user)
         {
             return new TokenResponseDto
             {
-                AccessToken = CreateToken(user),
-                RefreshToken = await GenerateAndSaveRefreshTokenAsync(user)
+                AccessToken = CreateToken(user)
             };
         }
 
         public async Task<User?> RegisterAsync(UserDto request)
         {
             if (await context.Users.AnyAsync(u => u.Username == request.Username))
-            {
                 return null;
-            }
+            
 
             var user = new User();
             var hashedPassword = new PasswordHasher<User>().HashPassword(user, request.Password);
@@ -56,13 +54,18 @@ namespace JwtAuth.Services
 
             return user;
         }
-        public async Task<TokenResponseDto?> RefreshTokenAsync(RefreshTokenRequestDto request)
+        public async Task<TokenResponseDto?> RefreshTokenAsync(string refreshToken)
         {
-            var user = await ValidateRefreshTokenAsync(request.RefreshToken);
+            var user = await ValidateRefreshTokenAsync(refreshToken);
             if (user is null)
                 return null;
 
-            return await CreateTokenResponse(user);
+            return CreateTokenResponse(user);
+        }
+
+        public async Task<User?> GetUserByRefreshTokenAsync(string refreshToken)
+        {
+            return await ValidateRefreshTokenAsync(refreshToken);
         }
 
         private async Task<User?> ValidateRefreshTokenAsync(string refreshToken)

@@ -25,21 +25,67 @@ namespace JwtAuth.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<TokenResponseDto>> Login(UserDto request)
         {
-            var response = await authService.LoginAsync(request);
-            if (response is null) 
+            var (tokenResponse, refreshToken) = await authService.LoginAsync(request);
+            if (tokenResponse == null || refreshToken == null)
             {
                 return BadRequest("Invalid username or password.");
             }
 
-            return Ok(response);
+            // Set the accessToken as a HTTP-only cookie
+            Response.Cookies.Append("accessToken", tokenResponse.AccessToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false, // Use true in production with HTTPS
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddMinutes(1)
+            });
+
+            // Set the refreshToken as a HTTP-only cookie as well
+            Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false, // Use true in production with HTTPS
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddDays(7)
+            });
+
+            return Ok(tokenResponse);
         }
 
         [HttpPost("refresh-token")]
-        public async Task<ActionResult<TokenResponseDto>> RefreshToken(RefreshTokenRequestDto request)
+        public async Task<ActionResult<TokenResponseDto>> RefreshToken()
         {
-            var result = await authService.RefreshTokenAsync(request);
-            if (result is null || result.AccessToken is null || result.RefreshToken is null)
+            var refreshToken = Request.Cookies["refreshToken"];
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                return BadRequest("No refresh token provided.");
+            }
+
+            var result = await authService.RefreshTokenAsync(refreshToken);
+            if (result is null)
+            {
                 return Unauthorized("Invalid refresh token.");
+            }
+
+            var user = await authService.GetUserByRefreshTokenAsync(refreshToken);
+            var newRefreshToken = await authService.GenerateAndSaveRefreshTokenAsync(user!);
+
+            // Set the accessToken as a HTTP-only cookie
+            Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false, // Use true in production with HTTPS
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddMinutes(15)
+            });
+
+            Response.Cookies.Append("refreshToken", newRefreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false, // For local development
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddDays(7)
+            });
 
             return Ok(result);
         }
