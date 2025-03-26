@@ -10,5 +10,6 @@ namespace JwtAuth.Services
         Task<TokenResponseDto?> RefreshTokenAsync(string refreshToken);
         Task<User?> GetUserByRefreshTokenAsync(string refreshToken);
         Task<string> GenerateAndSaveRefreshTokenAsync(User user);
+        Task<bool> LogoutAsync(string refreshToken);
     }
 }

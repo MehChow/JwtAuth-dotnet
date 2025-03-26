@@ -37,7 +37,7 @@ namespace JwtAuth.Controllers
                 HttpOnly = true,
                 Secure = false, // Use true in production with HTTPS
                 SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddMinutes(1)
+                Expires = DateTime.UtcNow.AddMinutes(15)
             });
 
             // Set the refreshToken as a HTTP-only cookie as well
@@ -88,6 +88,40 @@ namespace JwtAuth.Controllers
             });
 
             return Ok(result);
+        }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            var refreshToken = Request.Cookies["refreshToken"];
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                return BadRequest("No refresh token provided.");
+            }
+
+            var success = await authService.LogoutAsync(refreshToken);
+            if (!success)
+            {
+                return BadRequest("Invalid refresh token.");
+            }
+
+            // Clear the access token cookie
+            Response.Cookies.Delete("accessToken", new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false, // Use true in production with HTTPS
+                SameSite = SameSiteMode.Strict
+            });
+
+            // Clear the refresh token cookie
+            Response.Cookies.Delete("refreshToken", new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false, // Use true in production with HTTPS
+                SameSite = SameSiteMode.Strict
+            });
+
+            return Ok("Successfully logged out.");
         }
 
         [Authorize]

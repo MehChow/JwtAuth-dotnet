@@ -68,6 +68,20 @@ namespace JwtAuth.Services
             return await ValidateRefreshTokenAsync(refreshToken);
         }
 
+        public async Task<bool> LogoutAsync(string refreshToken)
+        {
+            var user = await context.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
+            if (user == null)
+                return false;
+
+            // Invalidate the refresh token
+            user.RefreshToken = null;
+            user.RefreshTokenExpiryTime = null;
+
+            await context.SaveChangesAsync();
+            return true;
+        }
+
         private async Task<User?> ValidateRefreshTokenAsync(string refreshToken)
         {
             return await context.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken
@@ -114,5 +128,7 @@ namespace JwtAuth.Services
 
             return new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
         }
+
+
     }
 }
