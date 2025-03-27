@@ -29,7 +29,7 @@
     "Parameters": [
       {
         "Name": "request",
-        "Type": "JwtAuth.Models.UserDto",
+        "Type": "JwtAuth.Models.LoginDto",
         "IsRequired": true
       }
     ],
@@ -85,7 +85,7 @@
     "Parameters": [
       {
         "Name": "request",
-        "Type": "JwtAuth.Models.UserDto",
+        "Type": "JwtAuth.Models.RegisterDto",
         "IsRequired": true
       }
     ],

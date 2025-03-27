@@ -26,6 +26,7 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<UserDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("UserDatabase")));
+builder.Services.AddLogging();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
@@ -51,6 +52,36 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
                 context.Token = accessToken;
             }
             return Task.CompletedTask;
+        },
+        OnChallenge = async context =>
+        {
+            // Prevent the default 401 response
+            context.HandleResponse();
+
+            // Set the response status code and content type
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            context.Response.ContentType = "application/json";
+
+            // Create a ServiceResult response
+            string errorMessage = "Authentication failed: Invalid or missing access token.";
+            if (context.AuthenticateFailure != null)
+            {
+                if (context.AuthenticateFailure is SecurityTokenExpiredException)
+                {
+                    errorMessage = "Authentication failed: Access token has expired.";
+                }
+                else if (context.AuthenticateFailure is SecurityTokenInvalidSignatureException)
+                {
+                    errorMessage = "Authentication failed: Invalid token signature.";
+                }
+                else if (string.IsNullOrEmpty(context.Request.Cookies["accessToken"]))
+                {
+                    errorMessage = "Authentication failed: Access token is missing.";
+                }
+            }
+
+            // Write the response
+            await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(errorMessage));
         }
     };
 });
