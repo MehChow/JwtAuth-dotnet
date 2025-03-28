@@ -27,6 +27,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<UserDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("UserDatabase")));
 builder.Services.AddLogging();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {

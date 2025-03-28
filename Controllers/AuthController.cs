@@ -19,26 +19,18 @@ namespace JwtAuth.Controllers
             var result = await authService.RegisterAsync(request);
             if (!result.IsSuccess)
             {
-                // User already exists
-                return BadRequest(result.Message);
-            }
+                // Username already exists
+                if (result.Message == AuthMessages.UsernameAlreadyExists)
+                {
+                    return Conflict(result.Message);
+                }
 
-            // Return the newly created user
-            return Ok(result.Data);
-        }
-
-        [HttpPost("login")]
-        public async Task<ActionResult<TokenResponseDto>> Login(LoginDto request)
-        {
-            var result = await authService.LoginAsync(request);
-            if (!result.IsSuccess)
-            {
-                // Invalid credentials
-                return BadRequest(result.Message);
+                // Db or server error
+                return StatusCode(500, result.Message);
             }
 
             // Set the accessToken and refreshToken as HTTP-only cookies
-            var (tokenResponse, refreshToken) = result.Data;
+            var (tokenResponse, refreshToken, user) = result.Data;
             Response.Cookies.Append("accessToken", tokenResponse.AccessToken, new CookieOptions
             {
                 HttpOnly = true,
@@ -54,8 +46,103 @@ namespace JwtAuth.Controllers
                 Expires = DateTime.UtcNow.AddDays(7)
             });
 
-            // Return the access token
-            return Ok(tokenResponse);
+            // Only return the neccessary info
+            var userResponse = new UserResponseDto
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Role = user.Role
+            };
+
+            // Return the access token and the user
+            return CreatedAtAction("GetUser", new { id = user.Id }, new
+            {
+                tokenResponse,
+                userResponse
+            });
+        }
+
+        [HttpPost("login")]
+        public async Task<ActionResult<TokenResponseDto>> Login(LoginDto request)
+        {
+            var result = await authService.LoginAsync(request);
+            if (!result.IsSuccess)
+            {
+                // Invalid credentials
+                if (result.Message == AuthMessages.InvalidCredentials)
+                {
+                    return Unauthorized(result.Message);
+                }
+
+                // Server error
+                return StatusCode(500, result.Message);
+            }
+
+            // Set the accessToken and refreshToken as HTTP-only cookies
+            var (tokenResponse, refreshToken, user) = result.Data;
+            Response.Cookies.Append("accessToken", tokenResponse.AccessToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = isProduction, // Use true in production with HTTPS
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddMinutes(15)
+            });
+            Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = isProduction, // Use true in production with HTTPS
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddDays(7)
+            });
+
+            // Only return the neccessary info
+            var userResponse = new UserResponseDto
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Role = user.Role
+            };
+
+            // Return the access token and the user
+            return Ok(new
+            {
+                tokenResponse,
+                userResponse
+            });
+        }
+
+        [Authorize]
+        [HttpGet("get-userinfo")]
+        public async Task<ActionResult<UserResponseDto>> GetUserInfo()
+        {
+            var result = await authService.GetUserInfoAsync();
+            if (!result.IsSuccess)
+            {
+                if (result.Message == AuthMessages.UserIdClaimNotFound || result.Message == AuthMessages.InvalidUserIdFormat)
+                {
+                    return Unauthorized(result.Message);
+                }
+
+                if (result.Message == AuthMessages.UserNotFound)
+                {
+                    return NotFound(result.Message);
+                }
+
+                // Server error
+                return StatusCode(500, result.Message);
+            }
+
+            var user = result.Data;
+
+            // Only return necessary info
+            var userResponse = new UserResponseDto
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Role = user.Role
+            };
+
+            return Ok(userResponse);
         }
 
         [HttpPost("refresh-token")]
@@ -72,7 +159,13 @@ namespace JwtAuth.Controllers
             if (!result.IsSuccess)
             {
                 // Invalid refresh token
-                return Unauthorized(result.Message);
+                if (result.Message == AuthMessages.InvalidRefreshToken)
+                {
+                    return Unauthorized(result.Message);
+                }
+
+                // Server error
+                return StatusCode(500, result.Message);
             }
 
             var user = await authService.GetUserByRefreshTokenAsync(refreshToken);

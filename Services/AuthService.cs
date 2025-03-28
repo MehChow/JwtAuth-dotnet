@@ -9,20 +9,21 @@ using JwtAuth.Constants;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Azure.Core;
 
 namespace JwtAuth.Services
 {
-    public class AuthService(UserDbContext context, IConfiguration configuration, ILogger<AuthService> logger) : IAuthService
+    public class AuthService(UserDbContext context, IConfiguration configuration, ILogger<AuthService> logger, IHttpContextAccessor httpContextAccessor) : IAuthService
     {
         // REGISTER
-        public async Task<ServiceResult<User>> RegisterAsync(RegisterDto request)
+        public async Task<ServiceResult<(TokenResponseDto TokenResponse, string RefreshToken, User User)>> RegisterAsync(RegisterDto request)
         {
             try
             {
                 // Check if the username already exists
                 if (await context.Users.AnyAsync(u => u.Username == request.Username))
                 {
-                    return new ServiceResult<User> { IsSuccess = false, Message = AuthMessages.UsernameAlreadyExists };
+                    return new ServiceResult<(TokenResponseDto, string, User)> { IsSuccess = false, Message = AuthMessages.UsernameAlreadyExists };
                 }
 
                 // Proceed to create the user
@@ -35,22 +36,26 @@ namespace JwtAuth.Services
                 context.Users.Add(user);
                 await context.SaveChangesAsync();
 
-                return new ServiceResult<User> { IsSuccess = true, Data = user };
+                // Proceed to generate the tokens
+                var tokenResponse = CreateTokenResponse(user);
+                var refreshToken = await GenerateAndSaveRefreshTokenAsync(user);
+
+                return new ServiceResult<(TokenResponseDto, string, User)> { IsSuccess = true, Data = (tokenResponse, refreshToken, user) };
             }
             catch (DbUpdateException ex)
             {
                 logger.LogError(ex, "Failed to register user {Username} due to database update error.", request.Username);
-                return new ServiceResult<User> { IsSuccess = false, Message = "Registration failed due to a server error. Please try again later." };
+                return new ServiceResult<(TokenResponseDto, string, User)> { IsSuccess = false, Message = "Registration failed due to a server error. Please try again later." };
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Unexpected error while registering user {Username}.", request.Username);
-                return new ServiceResult<User> { IsSuccess = false, Message = "Registration failed due to an unexpected error. Please try again later." };
+                return new ServiceResult<(TokenResponseDto, string, User)> { IsSuccess = false, Message = "Registration failed due to an unexpected error. Please try again later." };
             }
         }
 
         // LOGIN
-        public async Task<ServiceResult<(TokenResponseDto TokenResponse, string RefreshToken)>> LoginAsync(LoginDto request)
+        public async Task<ServiceResult<(TokenResponseDto TokenResponse, string RefreshToken, User User)>> LoginAsync(LoginDto request)
         {
             try
             {
@@ -58,25 +63,61 @@ namespace JwtAuth.Services
                 var user = await context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
                 if (user == null)
                 {
-                    return new ServiceResult<(TokenResponseDto, string)> { IsSuccess = false, Message = AuthMessages.InvalidCredentials };
+                    return new ServiceResult<(TokenResponseDto, string, User)> { IsSuccess = false, Message = AuthMessages.InvalidCredentials };
                 }
 
 
                 if (new PasswordHasher<User>().VerifyHashedPassword(user, user.PasswordHash, request.Password) == PasswordVerificationResult.Failed)
                 {
-                    return new ServiceResult<(TokenResponseDto, string)> { IsSuccess = false, Message = AuthMessages.InvalidCredentials };
+                    return new ServiceResult<(TokenResponseDto, string, User)> { IsSuccess = false, Message = AuthMessages.InvalidCredentials };
                 }
 
                 // Proceed to generate the tokens
                 var tokenResponse = CreateTokenResponse(user);
                 var refreshToken = await GenerateAndSaveRefreshTokenAsync(user);
 
-                return new ServiceResult<(TokenResponseDto, string)> { IsSuccess = true, Data = (tokenResponse, refreshToken) };
+                return new ServiceResult<(TokenResponseDto, string, User)> { IsSuccess = true, Data = (tokenResponse, refreshToken, user) };
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Unexpected error while logging in user {Username}.", request.Username);
-                return new ServiceResult<(TokenResponseDto, string)> { IsSuccess = false, Message = "Login failed due to an unexpected error. Please try again later." };
+                return new ServiceResult<(TokenResponseDto, string, User)> { IsSuccess = false, Message = "Login failed due to an unexpected error. Please try again later." };
+            }
+        }
+
+        // GET USER INFO
+        public async Task<ServiceResult<User>> GetUserInfoAsync()
+        {
+            string? userId = null;
+
+            try
+            {
+                // Get the user ID from the current user's claims (set by the accessToken)
+                userId = httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return new ServiceResult<User> { IsSuccess = false, Message = AuthMessages.UserIdClaimNotFound };
+                }
+
+                // Parse the userId string into a Guid
+                if (!Guid.TryParse(userId, out var userIdGuid))
+                {
+                    return new ServiceResult<User> { IsSuccess = false, Message = AuthMessages.InvalidUserIdFormat };
+                }
+
+                // Query the user by ID
+                var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userIdGuid);
+                if (user == null)
+                {
+                    return new ServiceResult<User> { IsSuccess = false, Message = AuthMessages.UserNotFound };
+                }
+
+                return new ServiceResult<User> { IsSuccess = true, Data = user };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Unexpected error while retrieving user info for user ID {UserId}.", userId);
+                return new ServiceResult<User> { IsSuccess = false, Message = "Failed to retrieve user info due to an unexpected error. Please try again later." };
             }
         }
 
