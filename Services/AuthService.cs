@@ -175,7 +175,7 @@ namespace JwtAuth.Services
         {
             return new TokenResponseDto
             {
-                AccessToken = CreateToken(user)
+                AccessToken = CreateToken(user),
             };
         }
 

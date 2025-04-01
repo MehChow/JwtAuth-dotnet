@@ -9,7 +9,7 @@ namespace JwtAuth.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController(IAuthService authService, IConfiguration configuration) : ControllerBase
+    public class AuthController(IAuthService authService, IConfiguration configuration, ILogger<AuthController> _logger) : ControllerBase
     {
         private readonly bool isProduction = configuration.GetValue<bool>("AppSettings:IsProduction");
 
@@ -146,7 +146,7 @@ namespace JwtAuth.Controllers
         }
 
         [HttpPost("refresh-token")]
-        public async Task<ActionResult<TokenResponseDto>> RefreshToken()
+        public async Task<ActionResult<RefreshTokenResponseDto>> RefreshToken()
         {
             var refreshToken = Request.Cookies["refreshToken"];
             if (string.IsNullOrEmpty(refreshToken))
@@ -189,7 +189,12 @@ namespace JwtAuth.Controllers
             });
 
             // Return the new access token
-            return Ok(result.Data);
+            _logger.LogInformation("Set-Cookie headers: {Headers}", string.Join(", ", Response.Headers["Set-Cookie"].ToArray())); 
+            return Ok(new
+            {
+                accessToken = result.Data.AccessToken,
+                refreshToken = newRefreshToken
+            });
         }
 
         [HttpPost("logout")]
@@ -230,5 +235,5 @@ namespace JwtAuth.Controllers
         {
             return Ok("You are an admin!!");
         }
-    }
+    }   
 }

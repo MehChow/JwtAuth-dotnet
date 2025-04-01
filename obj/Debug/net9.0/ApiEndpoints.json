@@ -85,7 +85,7 @@
     "Parameters": [],
     "ReturnTypes": [
       {
-        "Type": "JwtAuth.Models.TokenResponseDto",
+        "Type": "JwtAuth.Models.RefreshTokenResponseDto",
         "MediaTypes": [
           "text/plain",
           "application/json",
