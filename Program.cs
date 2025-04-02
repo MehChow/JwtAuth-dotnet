@@ -1,6 +1,7 @@
 using System.Text;
 using JwtAuth.Data;
 using JwtAuth.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
