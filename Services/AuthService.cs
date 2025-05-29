@@ -9,103 +9,105 @@ using JwtAuth.Constants;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Azure.Core;
 
 namespace JwtAuth.Services
 {
     public class AuthService(UserDbContext context, IConfiguration configuration, ILogger<AuthService> logger, IHttpContextAccessor httpContextAccessor) : IAuthService
     {
         // REGISTER
-        public async Task<ServiceResult<(TokenResponseDto TokenResponse, string RefreshToken, User User)>> RegisterAsync(RegisterDto request)
+        public async Task<ServiceResult<AuthInternalResponse>> RegisterAsync(RegisterDto request)
         {
             try
             {
                 // Check if the username already exists
                 if (await context.Users.AnyAsync(u => u.Username == request.Username))
                 {
-                    return new ServiceResult<(TokenResponseDto, string, User)> { IsSuccess = false, Message = AuthMessages.UsernameAlreadyExists };
+                    return new ServiceResult<AuthInternalResponse> { IsSuccess = false, Message = AuthMessages.UsernameAlreadyExists };
                 }
 
-                // Proceed to create the user
-                var user = new User();
-                var hashedPassword = new PasswordHasher<User>().HashPassword(user, request.Password);
-
-                user.Username = request.Username;
-                user.PasswordHash = hashedPassword;
+                var user = new User
+                {
+                    Username = request.Username,
+                    PasswordHash = new PasswordHasher<User>().HashPassword(null!, request.Password)
+                };
 
                 context.Users.Add(user);
                 await context.SaveChangesAsync();
 
                 // Proceed to generate the tokens
-                var tokenResponse = CreateTokenResponse(user);
+                var accessToken = CreateToken(user);
                 var refreshToken = await GenerateAndSaveRefreshTokenAsync(user);
 
-                return new ServiceResult<(TokenResponseDto, string, User)> { IsSuccess = true, Data = (tokenResponse, refreshToken, user) };
+                return new ServiceResult<AuthInternalResponse> { IsSuccess = true,
+                    Data = new AuthInternalResponse
+                    {
+                        AccessToken = accessToken,
+                        RefreshToken = refreshToken,
+                        User = user
+                    }
+                };
             }
             catch (DbUpdateException ex)
             {
                 logger.LogError(ex, "Failed to register user {Username} due to database update error.", request.Username);
-                return new ServiceResult<(TokenResponseDto, string, User)> { IsSuccess = false, Message = "Registration failed due to a server error. Please try again later." };
+                return new ServiceResult<AuthInternalResponse> { IsSuccess = false, Message = "Registration failed due to a server error. Please try again later." };
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Unexpected error while registering user {Username}.", request.Username);
-                return new ServiceResult<(TokenResponseDto, string, User)> { IsSuccess = false, Message = "Registration failed due to an unexpected error. Please try again later." };
+                return new ServiceResult<AuthInternalResponse> { IsSuccess = false, Message = "Registration failed due to an unexpected error. Please try again later." };
             }
         }
 
         // LOGIN
-        public async Task<ServiceResult<(TokenResponseDto TokenResponse, string RefreshToken, User User)>> LoginAsync(LoginDto request)
+        public async Task<ServiceResult<AuthInternalResponse>> LoginAsync(LoginDto request)
         {
             try
             {
-                // Check if the user exists
+                // User not exist
                 var user = await context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
                 if (user == null)
                 {
-                    return new ServiceResult<(TokenResponseDto, string, User)> { IsSuccess = false, Message = AuthMessages.InvalidCredentials };
+                    return new ServiceResult<AuthInternalResponse> { IsSuccess = false, Message = AuthMessages.InvalidCredentials };
                 }
 
-
-                if (new PasswordHasher<User>().VerifyHashedPassword(user, user.PasswordHash, request.Password) == PasswordVerificationResult.Failed)
+                // Password not match
+                if (new PasswordHasher<User>().VerifyHashedPassword(user, user.PasswordHash ?? string.Empty, request.Password) == PasswordVerificationResult.Failed)
                 {
-                    return new ServiceResult<(TokenResponseDto, string, User)> { IsSuccess = false, Message = AuthMessages.InvalidCredentials };
+                    return new ServiceResult<AuthInternalResponse> { IsSuccess = false, Message = AuthMessages.InvalidCredentials };
                 }
 
                 // Proceed to generate the tokens
-                var tokenResponse = CreateTokenResponse(user);
+                var accessToken = CreateToken(user);
                 var refreshToken = await GenerateAndSaveRefreshTokenAsync(user);
 
-                return new ServiceResult<(TokenResponseDto, string, User)> { IsSuccess = true, Data = (tokenResponse, refreshToken, user) };
+                return new ServiceResult<AuthInternalResponse> { IsSuccess = true,
+                    Data = new AuthInternalResponse
+                    {
+                        AccessToken = accessToken,
+                        RefreshToken = refreshToken,
+                        User = user
+                    }
+                };
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Unexpected error while logging in user {Username}.", request.Username);
-                return new ServiceResult<(TokenResponseDto, string, User)> { IsSuccess = false, Message = "Login failed due to an unexpected error. Please try again later." };
+                return new ServiceResult<AuthInternalResponse> { IsSuccess = false, Message = "Login failed due to an unexpected error. Please try again later." };
             }
         }
 
         // GET USER INFO
         public async Task<ServiceResult<User>> GetUserInfoAsync()
         {
-            string? userId = null;
-
             try
             {
-                // Get the user ID from the current user's claims (set by the accessToken)
-                userId = httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return new ServiceResult<User> { IsSuccess = false, Message = AuthMessages.UserIdClaimNotFound };
-                }
-
-                // Parse the userId string into a Guid
-                if (!Guid.TryParse(userId, out var userIdGuid))
+                var userId = httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userIdGuid))
                 {
                     return new ServiceResult<User> { IsSuccess = false, Message = AuthMessages.InvalidUserIdFormat };
                 }
 
-                // Query the user by ID
                 var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userIdGuid);
                 if (user == null)
                 {
@@ -116,69 +118,90 @@ namespace JwtAuth.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Unexpected error while retrieving user info for user ID {UserId}.", userId);
-                return new ServiceResult<User> { IsSuccess = false, Message = "Failed to retrieve user info due to an unexpected error. Please try again later." };
-            }
-        }
-
-        // REFRESH TOKEN
-        public async Task<ServiceResult<TokenResponseDto>> RefreshTokenAsync(string refreshToken)
-        {
-            try
-            {
-                // Check if the refresh token is valid
-                var user = await ValidateRefreshTokenAsync(refreshToken);
-                if (user == null)
-                {
-                    return new ServiceResult<TokenResponseDto> { IsSuccess = false, Message = AuthMessages.InvalidRefreshToken };
-                }
-
-                // Proceed to generate the new access token
-                var tokenResponse = CreateTokenResponse(user);
-                return new ServiceResult<TokenResponseDto> { IsSuccess = true, Data = tokenResponse };
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Unexpected error while refreshing token for refreshToken {RefreshToken}.", refreshToken);
-                return new ServiceResult<TokenResponseDto> { IsSuccess = false, Message = "Token refresh failed due to an unexpected error. Please try again later." };
+                logger.LogError(ex, "Unexpected error while retrieving user info for user ID {UserId}.", httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                return new ServiceResult<User> { IsSuccess = false, Message = "Failed to retrieve user info due to an unexpected error." };
             }
         }
 
         // LOGOUT
-        public async Task<ServiceResult> LogoutAsync(string? refreshToken)
+        public async Task<ServiceResult> LogoutAsync(string? refreshToken, string? accessToken)
         {
             try
             {
-                var user = await context.Users
-                .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken && u.RefreshTokenExpiryTime >= DateTime.UtcNow);
-
-                if (user != null)
+                if (!string.IsNullOrEmpty(refreshToken))
                 {
-                    // Token is valid, so invalidate it
-                    user.RefreshToken = null;
-                    user.RefreshTokenExpiryTime = null;
-                    await context.SaveChangesAsync();
+                    var hashedToken = HashToken(refreshToken);
+                    var tokenRecord = await context.RefreshTokens
+                        .FirstOrDefaultAsync(t => t.TokenHash == hashedToken && !t.IsRevoked && t.ExpiresAt > DateTime.UtcNow);
+                    if (tokenRecord != null)
+                    {
+                        tokenRecord.IsRevoked = true;
+                        await context.SaveChangesAsync();
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(accessToken))
+                {
+                    var tokenHandler = new JwtSecurityTokenHandler();
+                    var jwtToken = tokenHandler.ReadJwtToken(accessToken);
+                    var jti = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
+                    if (!string.IsNullOrEmpty(jti))
+                    {
+                        context.BlacklistedTokens.Add(new BlacklistedToken
+                        {
+                            Jti = jti,
+                            ExpiryDate = DateTime.UtcNow.AddMinutes(15)
+                        });
+                        await context.SaveChangesAsync();
+                    }
                 }
 
                 return new ServiceResult { IsSuccess = true, Message = AuthMessages.LogoutSuccess };
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Unexpected error while logging out with refreshToken {RefreshToken}.", refreshToken);
-                // Still return success, as the client session is terminated via cookie deletion
+                logger.LogError(ex, "Unexpected error while logging out.");
                 return new ServiceResult { IsSuccess = true, Message = AuthMessages.LogoutSuccess };
             }
         }
 
-        // HELPER METHODS BELOW
-        private TokenResponseDto CreateTokenResponse(User user)
+        // REFRESH TOKEN
+        public async Task<ServiceResult<AuthInternalResponse>> RefreshTokenAsync(string refreshToken)
         {
-            return new TokenResponseDto
+            try
             {
-                AccessToken = CreateToken(user),
-            };
+                var hashedToken = HashToken(refreshToken);
+                var tokenRecord = await context.RefreshTokens
+                    .FirstOrDefaultAsync(t => t.TokenHash == hashedToken && !t.IsRevoked && t.ExpiresAt > DateTime.UtcNow);
+                if (tokenRecord == null)
+                {
+                    return new ServiceResult<AuthInternalResponse> { IsSuccess = false, Message = AuthMessages.InvalidRefreshToken };
+                }
+
+                // Mark old token as revoked
+                tokenRecord.IsRevoked = true;
+                await context.SaveChangesAsync();
+
+                // Get user
+                var user = await context.Users.FindAsync(tokenRecord.UserId);
+                if (user == null)
+                {
+                    return new ServiceResult<AuthInternalResponse> { IsSuccess = false, Message = AuthMessages.InvalidRefreshToken };
+                }
+
+                // Generate new tokens
+                var accessToken = CreateToken(user);
+                var newRefreshToken = await GenerateAndSaveRefreshTokenAsync(user);
+                return new ServiceResult<AuthInternalResponse> { IsSuccess = true, Data = { AccessToken = accessToken, RefreshToken = newRefreshToken } };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Unexpected error while refreshing token.");
+                return new ServiceResult<AuthInternalResponse> { IsSuccess = false, Message = "Token refresh failed due to an unexpected error." };
+            }
         }
 
+        // HELPER METHODS BELOW
         public async Task<User?> GetUserByRefreshTokenAsync(string refreshToken)
         {
             return await ValidateRefreshTokenAsync(refreshToken);
@@ -188,13 +211,18 @@ namespace JwtAuth.Services
         {
             try
             {
-                return await context.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken
-                                && u.RefreshTokenExpiryTime > DateTime.UtcNow);
+                var hashedToken = HashToken(refreshToken);
+                var tokenRecord = await context.RefreshTokens
+                    .Include(t => t.User)
+                    .FirstOrDefaultAsync(t => t.TokenHash == hashedToken
+                                    && !t.IsRevoked
+                                    && t.ExpiresAt > DateTime.UtcNow);
+                return tokenRecord?.User;
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Unexpected error while validating refresh token {RefreshToken}.", refreshToken);
-                return null; // Return null to indicate failure
+                logger.LogError(ex, "Unexpected error while validating refresh token.");
+                return null;
             }
         }
 
@@ -211,15 +239,22 @@ namespace JwtAuth.Services
             try
             {
                 var refreshToken = GenerateRefreshToken();
-                user.RefreshToken = refreshToken;
-                user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+                var tokenRecord = new RefreshToken
+                {
+                    UserId = user.Id,
+                    TokenHash = HashToken(refreshToken),
+                    IssuedAt = DateTime.UtcNow,
+                    ExpiresAt = DateTime.UtcNow.AddDays(7),
+                    IsRevoked = false
+                };
+                context.RefreshTokens.Add(tokenRecord);
                 await context.SaveChangesAsync();
                 return refreshToken;
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Unexpected error while generating and saving refresh token for user {UserId}.", user.Id);
-                throw; // Rethrow to be handled by the caller (e.g., LoginAsync)
+                throw;
             }
         }
 
@@ -229,7 +264,8 @@ namespace JwtAuth.Services
             {
                 new(ClaimTypes.Name, user.Username),
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new(ClaimTypes.Role, user.Role)
+                new(ClaimTypes.Role, user.Role),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()) // Add jti for blacklisting
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetValue<string>("AppSettings:Token")!));
@@ -245,6 +281,13 @@ namespace JwtAuth.Services
             );
 
             return new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
+        }
+
+        private static string HashToken(string token)
+        {
+            var bytes = Encoding.UTF8.GetBytes(token);
+            var hash = SHA256.HashData(bytes);
+            return Convert.ToBase64String(hash);
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace JwtAuth.Models
 {
-    public class TokenResponseDto
+    public class AccessTokenResponseDto
     {
         public required string AccessToken { get; set; }
     }

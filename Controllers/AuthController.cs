@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using JwtAuth.Entities;
 using JwtAuth.Models;
 using JwtAuth.Services;
 using JwtAuth.Constants;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging;
 
 namespace JwtAuth.Controllers
 {
@@ -14,7 +14,7 @@ namespace JwtAuth.Controllers
         private readonly bool isProduction = configuration.GetValue<bool>("AppSettings:IsProduction");
 
         [HttpPost("register")]
-        public async Task<ActionResult<User>> Register(RegisterDto request)
+        public async Task<ActionResult<UserResponseDto>> Register(RegisterDto request)
         {
             var result = await authService.RegisterAsync(request);
             if (!result.IsSuccess)
@@ -30,40 +30,38 @@ namespace JwtAuth.Controllers
             }
 
             // Set the accessToken and refreshToken as HTTP-only cookies
-            var (tokenResponse, refreshToken, user) = result.Data;
-            Response.Cookies.Append("accessToken", tokenResponse.AccessToken, new CookieOptions
+            var requestResponse = result.Data;
+            Response.Cookies.Append("accessToken", requestResponse.AccessToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = isProduction, // Use true in production with HTTPS
                 SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddMinutes(15)
+                Expires = DateTime.UtcNow.AddMinutes(15),
+                Path = "/api"
             });
-            Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
+            Response.Cookies.Append("refreshToken", requestResponse.RefreshToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = isProduction, // Use true in production with HTTPS
                 SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddDays(7)
+                Expires = DateTime.UtcNow.AddDays(7),
+                Path = "/api"
             });
 
             // Only return the neccessary info
             var userResponse = new UserResponseDto
             {
-                Id = user.Id,
-                Username = user.Username,
-                Role = user.Role
+                Id = requestResponse.User.Id,
+                Username = requestResponse.User.Username,
+                Role = requestResponse.User.Role
             };
 
             // Return the access token and the user
-            return CreatedAtAction("GetUser", new { id = user.Id }, new
-            {
-                tokenResponse,
-                userResponse
-            });
+            return Ok(userResponse);
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<TokenResponseDto>> Login(LoginDto request)
+        public async Task<ActionResult<UserResponseDto>> Login(LoginDto request)
         {
             var result = await authService.LoginAsync(request);
             if (!result.IsSuccess)
@@ -79,36 +77,35 @@ namespace JwtAuth.Controllers
             }
 
             // Set the accessToken and refreshToken as HTTP-only cookies
-            var (tokenResponse, refreshToken, user) = result.Data;
-            Response.Cookies.Append("accessToken", tokenResponse.AccessToken, new CookieOptions
+            var loginResponse  = result.Data!;
+
+            Response.Cookies.Append("accessToken", loginResponse.AccessToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = isProduction, // Use true in production with HTTPS
                 SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddMinutes(15)
+                Expires = DateTime.UtcNow.AddMinutes(15),
+                Path = "/api"
             });
-            Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
+            Response.Cookies.Append("refreshToken", loginResponse.RefreshToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = isProduction, // Use true in production with HTTPS
                 SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddDays(7)
+                Expires = DateTime.UtcNow.AddDays(7),
+                Path = "/api"
             });
 
             // Only return the neccessary info
             var userResponse = new UserResponseDto
             {
-                Id = user.Id,
-                Username = user.Username,
-                Role = user.Role
+                Id = loginResponse.User.Id,
+                Username = loginResponse.User.Username,
+                Role = loginResponse.User.Role
             };
 
             // Return the access token and the user
-            return Ok(new
-            {
-                tokenResponse,
-                userResponse
-            });
+            return Ok(userResponse);
         }
 
         [Authorize]
@@ -118,21 +115,18 @@ namespace JwtAuth.Controllers
             var result = await authService.GetUserInfoAsync();
             if (!result.IsSuccess)
             {
-                if (result.Message == AuthMessages.UserIdClaimNotFound || result.Message == AuthMessages.InvalidUserIdFormat)
+                if (result.Message == AuthMessages.InvalidUserIdFormat)
                 {
                     return Unauthorized(result.Message);
                 }
-
                 if (result.Message == AuthMessages.UserNotFound)
                 {
                     return NotFound(result.Message);
                 }
-
-                // Server error
                 return StatusCode(500, result.Message);
             }
 
-            var user = result.Data;
+            var user = result.Data!;
 
             // Only return necessary info
             var userResponse = new UserResponseDto
@@ -146,7 +140,7 @@ namespace JwtAuth.Controllers
         }
 
         [HttpPost("refresh-token")]
-        public async Task<ActionResult<RefreshTokenResponseDto>> RefreshToken()
+        public async Task<ActionResult> RefreshToken()
         {
             var refreshToken = Request.Cookies["refreshToken"];
             if (string.IsNullOrEmpty(refreshToken))
@@ -168,55 +162,54 @@ namespace JwtAuth.Controllers
                 return StatusCode(500, result.Message);
             }
 
-            var user = await authService.GetUserByRefreshTokenAsync(refreshToken);
-            var newRefreshToken = await authService.GenerateAndSaveRefreshTokenAsync(user!);
+            var response = result.Data!;
 
             // Set the accessToken and refreshToken as HTTP-only cookies
-            Response.Cookies.Append("accessToken", result.Data.AccessToken, new CookieOptions
+            Response.Cookies.Append("accessToken", response.AccessToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = isProduction, // Use true in production with HTTPS
                 SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddMinutes(15)
+                Expires = DateTime.UtcNow.AddMinutes(15),
+                Path = "/api"
             });
 
-            Response.Cookies.Append("refreshToken", newRefreshToken, new CookieOptions
+            Response.Cookies.Append("refreshToken", response.RefreshToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = isProduction, // Use true in production with HTTPS
                 SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddDays(7)
+                Expires = DateTime.UtcNow.AddDays(7),
+                Path = "/api"
             });
 
             // Return the new access token
-            _logger.LogInformation("Set-Cookie headers: {Headers}", string.Join(", ", Response.Headers["Set-Cookie"].ToArray())); 
-            return Ok(new
-            {
-                accessToken = result.Data.AccessToken,
-                refreshToken = newRefreshToken
-            });
+            _logger.LogInformation("Set-Cookie headers: {Headers}", string.Join(", ", Response.Headers["Set-Cookie"].ToArray()));
+            return Ok();
         }
 
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
             var refreshToken = Request.Cookies["refreshToken"];
+            var accessToken = Request.Cookies["accessToken"];
 
-            // Call the service even if refreshToken is null/empty, as it will handle it gracefully
-            var result = await authService.LogoutAsync(refreshToken);
+            var result = await authService.LogoutAsync(refreshToken, accessToken);
 
             // Clear cookies regardless of token state
             Response.Cookies.Delete("accessToken", new CookieOptions
             {
                 HttpOnly = true,
                 Secure = isProduction, // Use true in production with HTTPS
-                SameSite = SameSiteMode.Strict
+                SameSite = SameSiteMode.Strict,
+                Path = "/api"
             });
             Response.Cookies.Delete("refreshToken", new CookieOptions
             {
                 HttpOnly = true,
                 Secure = isProduction, // Use true in production with HTTPS
-                SameSite = SameSiteMode.Strict
+                SameSite = SameSiteMode.Strict,
+                Path = "/api"
             });
 
             return Ok(result.Message);

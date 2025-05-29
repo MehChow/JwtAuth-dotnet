@@ -8,7 +8,7 @@
         public string Role { get; set; } = "User";
         public string? Provider { get; set; } // "Local", "Google", "GitHub"
         public string? ProviderId { get; set; } // Unique ID from OAuth provider
-        public string? RefreshToken { get; set; }
-        public DateTime? RefreshTokenExpiryTime { get; set; }
+        public List<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>(); // Navigation property
+
     }
 }

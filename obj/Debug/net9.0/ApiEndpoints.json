@@ -55,7 +55,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "JwtAuth.Models.TokenResponseDto",
+        "Type": "JwtAuth.Models.UserResponseDto",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -83,17 +83,7 @@
     "IsController": true,
     "Order": 0,
     "Parameters": [],
-    "ReturnTypes": [
-      {
-        "Type": "JwtAuth.Models.RefreshTokenResponseDto",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
+    "ReturnTypes": []
   },
   {
     "ContainingType": "JwtAuth.Controllers.AuthController",
@@ -111,7 +101,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "JwtAuth.Entities.User",
+        "Type": "JwtAuth.Models.UserResponseDto",
         "MediaTypes": [
           "text/plain",
           "application/json",

@@ -1,7 +1,7 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using JwtAuth.Data;
 using JwtAuth.Services;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -55,6 +55,22 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
             }
             return Task.CompletedTask;
         },
+
+        OnTokenValidated = async context =>
+        {
+            var jti = context.Principal?.FindFirst(JwtRegisteredClaimNames.Jti)?.Value;
+            if (!string.IsNullOrEmpty(jti))
+            {
+                var dbContext = context.HttpContext.RequestServices.GetRequiredService<UserDbContext>();
+                var isBlacklisted = await dbContext.BlacklistedTokens
+                    .AnyAsync(t => t.Jti == jti && t.ExpiryDate > DateTime.UtcNow);
+                if (isBlacklisted)
+                {
+                    context.Fail("Token has been invalidated.");
+                }
+            }
+        },
+
         OnChallenge = async context =>
         {
             // Prevent the default 401 response
@@ -68,18 +84,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
             string errorMessage = "Authentication failed: Invalid or missing access token.";
             if (context.AuthenticateFailure != null)
             {
-                if (context.AuthenticateFailure is SecurityTokenExpiredException)
+                errorMessage = context.AuthenticateFailure switch
                 {
-                    errorMessage = "Authentication failed: Access token has expired.";
-                }
-                else if (context.AuthenticateFailure is SecurityTokenInvalidSignatureException)
-                {
-                    errorMessage = "Authentication failed: Invalid token signature.";
-                }
-                else if (string.IsNullOrEmpty(context.Request.Cookies["accessToken"]))
-                {
-                    errorMessage = "Authentication failed: Access token is missing.";
-                }
+                    SecurityTokenExpiredException => "Unauthorized: Token expired.",
+                    SecurityTokenInvalidSignatureException => "Unauthorized: Invalid token signature.",
+                    _ => string.IsNullOrEmpty(context.Request.Cookies["accessToken"])
+                        ? "Unauthorized: Missing token."
+                        : "Unauthorized: Invalid token."
+                };
             }
 
             // Write the response
