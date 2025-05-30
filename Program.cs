@@ -17,7 +17,6 @@ builder.Services.AddCors(options =>
         policy.WithOrigins("http://localhost:3000") // Your Next.js app URL
               .AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowAnyHeader()
               .AllowCredentials();
     });
 });

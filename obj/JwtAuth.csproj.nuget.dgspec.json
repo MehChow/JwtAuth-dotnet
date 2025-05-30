@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\User\\Desktop\\JwtAuth\\JwtAuth\\JwtAuth.csproj": {}
+    "C:\\Users\\User\\Desktop\\meh-ecommerce\\JwtAuth\\JwtAuth\\JwtAuth.csproj": {}
   },
   "projects": {
-    "C:\\Users\\User\\Desktop\\JwtAuth\\JwtAuth\\JwtAuth.csproj": {
+    "C:\\Users\\User\\Desktop\\meh-ecommerce\\JwtAuth\\JwtAuth\\JwtAuth.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\User\\Desktop\\JwtAuth\\JwtAuth\\JwtAuth.csproj",
+        "projectUniqueName": "C:\\Users\\User\\Desktop\\meh-ecommerce\\JwtAuth\\JwtAuth\\JwtAuth.csproj",
         "projectName": "JwtAuth",
-        "projectPath": "C:\\Users\\User\\Desktop\\JwtAuth\\JwtAuth\\JwtAuth.csproj",
+        "projectPath": "C:\\Users\\User\\Desktop\\meh-ecommerce\\JwtAuth\\JwtAuth\\JwtAuth.csproj",
         "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\User\\Desktop\\JwtAuth\\JwtAuth\\obj\\",
+        "outputPath": "C:\\Users\\User\\Desktop\\meh-ecommerce\\JwtAuth\\JwtAuth\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

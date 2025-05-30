@@ -20,7 +20,7 @@ namespace JwtAuth.Controllers
             if (!result.IsSuccess)
             {
                 // Username already exists
-                if (result.Message == AuthMessages.UsernameAlreadyExists)
+                if (result.Message == AuthMessages.USERNAME_ALREADY_EXISTS)
                 {
                     return Conflict(result.Message);
                 }
@@ -37,7 +37,6 @@ namespace JwtAuth.Controllers
                 Secure = isProduction, // Use true in production with HTTPS
                 SameSite = SameSiteMode.Strict,
                 Expires = DateTime.UtcNow.AddMinutes(15),
-                Path = "/api"
             });
             Response.Cookies.Append("refreshToken", requestResponse.RefreshToken, new CookieOptions
             {
@@ -45,7 +44,6 @@ namespace JwtAuth.Controllers
                 Secure = isProduction, // Use true in production with HTTPS
                 SameSite = SameSiteMode.Strict,
                 Expires = DateTime.UtcNow.AddDays(7),
-                Path = "/api"
             });
 
             // Only return the neccessary info
@@ -67,7 +65,7 @@ namespace JwtAuth.Controllers
             if (!result.IsSuccess)
             {
                 // Invalid credentials
-                if (result.Message == AuthMessages.InvalidCredentials)
+                if (result.Message == AuthMessages.INVALID_CREDENTIALS)
                 {
                     return Unauthorized(result.Message);
                 }
@@ -85,7 +83,6 @@ namespace JwtAuth.Controllers
                 Secure = isProduction, // Use true in production with HTTPS
                 SameSite = SameSiteMode.Strict,
                 Expires = DateTime.UtcNow.AddMinutes(15),
-                Path = "/api"
             });
             Response.Cookies.Append("refreshToken", loginResponse.RefreshToken, new CookieOptions
             {
@@ -93,7 +90,6 @@ namespace JwtAuth.Controllers
                 Secure = isProduction, // Use true in production with HTTPS
                 SameSite = SameSiteMode.Strict,
                 Expires = DateTime.UtcNow.AddDays(7),
-                Path = "/api"
             });
 
             // Only return the neccessary info
@@ -115,11 +111,11 @@ namespace JwtAuth.Controllers
             var result = await authService.GetUserInfoAsync();
             if (!result.IsSuccess)
             {
-                if (result.Message == AuthMessages.InvalidUserIdFormat)
+                if (result.Message == AuthMessages.INVALID_USER_ID_FORMAT)
                 {
                     return Unauthorized(result.Message);
                 }
-                if (result.Message == AuthMessages.UserNotFound)
+                if (result.Message == AuthMessages.USER_NOT_FOUND)
                 {
                     return NotFound(result.Message);
                 }
@@ -146,14 +142,14 @@ namespace JwtAuth.Controllers
             if (string.IsNullOrEmpty(refreshToken))
             {
                 // No refresh token provided
-                return BadRequest(AuthMessages.NoRefreshTokenProvided);
+                return BadRequest(AuthMessages.NO_REFRESH_TOKEN_PROVIDED);
             }
 
             var result = await authService.RefreshTokenAsync(refreshToken);
             if (!result.IsSuccess)
             {
                 // Invalid refresh token
-                if (result.Message == AuthMessages.InvalidRefreshToken)
+                if (result.Message == AuthMessages.INVALID_REFRESH_TOKEN)
                 {
                     return Unauthorized(result.Message);
                 }
@@ -171,7 +167,6 @@ namespace JwtAuth.Controllers
                 Secure = isProduction, // Use true in production with HTTPS
                 SameSite = SameSiteMode.Strict,
                 Expires = DateTime.UtcNow.AddMinutes(15),
-                Path = "/api"
             });
 
             Response.Cookies.Append("refreshToken", response.RefreshToken, new CookieOptions
@@ -180,7 +175,6 @@ namespace JwtAuth.Controllers
                 Secure = isProduction, // Use true in production with HTTPS
                 SameSite = SameSiteMode.Strict,
                 Expires = DateTime.UtcNow.AddDays(7),
-                Path = "/api"
             });
 
             // Return the new access token
@@ -202,14 +196,12 @@ namespace JwtAuth.Controllers
                 HttpOnly = true,
                 Secure = isProduction, // Use true in production with HTTPS
                 SameSite = SameSiteMode.Strict,
-                Path = "/api"
             });
             Response.Cookies.Delete("refreshToken", new CookieOptions
             {
                 HttpOnly = true,
                 Secure = isProduction, // Use true in production with HTTPS
                 SameSite = SameSiteMode.Strict,
-                Path = "/api"
             });
 
             return Ok(result.Message);

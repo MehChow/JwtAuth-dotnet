@@ -22,7 +22,7 @@ namespace JwtAuth.Services
                 // Check if the username already exists
                 if (await context.Users.AnyAsync(u => u.Username == request.Username))
                 {
-                    return new ServiceResult<AuthInternalResponse> { IsSuccess = false, Message = AuthMessages.UsernameAlreadyExists };
+                    return new ServiceResult<AuthInternalResponse> { IsSuccess = false, Message = AuthMessages.USERNAME_ALREADY_EXISTS };
                 }
 
                 var user = new User
@@ -68,14 +68,24 @@ namespace JwtAuth.Services
                 var user = await context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
                 if (user == null)
                 {
-                    return new ServiceResult<AuthInternalResponse> { IsSuccess = false, Message = AuthMessages.InvalidCredentials };
+                    return new ServiceResult<AuthInternalResponse> { IsSuccess = false, Message = AuthMessages.INVALID_CREDENTIALS };
                 }
 
                 // Password not match
                 if (new PasswordHasher<User>().VerifyHashedPassword(user, user.PasswordHash ?? string.Empty, request.Password) == PasswordVerificationResult.Failed)
                 {
-                    return new ServiceResult<AuthInternalResponse> { IsSuccess = false, Message = AuthMessages.InvalidCredentials };
+                    return new ServiceResult<AuthInternalResponse> { IsSuccess = false, Message = AuthMessages.INVALID_CREDENTIALS };
                 }
+
+                //// For invalidate all existing refresh tokens for the user, uncomment when needed
+                //var existingTokens = await context.RefreshTokens
+                //    .Where(t => t.UserId == user.Id && !t.IsRevoked && t.ExpiresAt > DateTime.UtcNow)
+                //    .ToListAsync();
+                //foreach (var token in existingTokens)
+                //{
+                //    token.IsRevoked = true;
+                //}
+                //await context.SaveChangesAsync();
 
                 // Proceed to generate the tokens
                 var accessToken = CreateToken(user);
@@ -105,13 +115,13 @@ namespace JwtAuth.Services
                 var userId = httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userIdGuid))
                 {
-                    return new ServiceResult<User> { IsSuccess = false, Message = AuthMessages.InvalidUserIdFormat };
+                    return new ServiceResult<User> { IsSuccess = false, Message = AuthMessages.INVALID_USER_ID_FORMAT };
                 }
 
                 var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userIdGuid);
                 if (user == null)
                 {
-                    return new ServiceResult<User> { IsSuccess = false, Message = AuthMessages.UserNotFound };
+                    return new ServiceResult<User> { IsSuccess = false, Message = AuthMessages.USER_NOT_FOUND };
                 }
 
                 return new ServiceResult<User> { IsSuccess = true, Data = user };
@@ -156,12 +166,12 @@ namespace JwtAuth.Services
                     }
                 }
 
-                return new ServiceResult { IsSuccess = true, Message = AuthMessages.LogoutSuccess };
+                return new ServiceResult { IsSuccess = true, Message = AuthMessages.LOGOUT_SUCCESS };
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Unexpected error while logging out.");
-                return new ServiceResult { IsSuccess = true, Message = AuthMessages.LogoutSuccess };
+                return new ServiceResult { IsSuccess = true, Message = AuthMessages.LOGOUT_SUCCESS };
             }
         }
 
@@ -175,7 +185,7 @@ namespace JwtAuth.Services
                     .FirstOrDefaultAsync(t => t.TokenHash == hashedToken && !t.IsRevoked && t.ExpiresAt > DateTime.UtcNow);
                 if (tokenRecord == null)
                 {
-                    return new ServiceResult<AuthInternalResponse> { IsSuccess = false, Message = AuthMessages.InvalidRefreshToken };
+                    return new ServiceResult<AuthInternalResponse> { IsSuccess = false, Message = AuthMessages.INVALID_REFRESH_TOKEN };
                 }
 
                 // Mark old token as revoked
@@ -186,13 +196,13 @@ namespace JwtAuth.Services
                 var user = await context.Users.FindAsync(tokenRecord.UserId);
                 if (user == null)
                 {
-                    return new ServiceResult<AuthInternalResponse> { IsSuccess = false, Message = AuthMessages.InvalidRefreshToken };
+                    return new ServiceResult<AuthInternalResponse> { IsSuccess = false, Message = AuthMessages.USER_NOT_FOUND };
                 }
 
                 // Generate new tokens
                 var accessToken = CreateToken(user);
                 var newRefreshToken = await GenerateAndSaveRefreshTokenAsync(user);
-                return new ServiceResult<AuthInternalResponse> { IsSuccess = true, Data = { AccessToken = accessToken, RefreshToken = newRefreshToken } };
+                return new ServiceResult<AuthInternalResponse> { IsSuccess = true, Data = new AuthInternalResponse { AccessToken = accessToken, RefreshToken = newRefreshToken } };
             }
             catch (Exception ex)
             {

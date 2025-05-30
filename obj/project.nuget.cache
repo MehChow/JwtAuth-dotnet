@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "7HMwQzm2ndU=",
+  "dgSpecHash": "1xU36D6jcvc=",
   "success": true,
-  "projectFilePath": "C:\\Users\\User\\Desktop\\JwtAuth\\JwtAuth\\JwtAuth.csproj",
+  "projectFilePath": "C:\\Users\\User\\Desktop\\meh-ecommerce\\JwtAuth\\JwtAuth\\JwtAuth.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\User\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\User\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",

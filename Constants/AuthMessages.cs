@@ -3,21 +3,21 @@
     public static class AuthMessages
     {
         // Register
-        public const string UsernameAlreadyExists = "USERNAME_ALREADY_EXISTS";
+        public const string USERNAME_ALREADY_EXISTS = "USERNAME_ALREADY_EXISTS";
 
         // Login
-        public const string InvalidCredentials = "INVALID_CREDENTIALS";
+        public const string INVALID_CREDENTIALS = "INVALID_CREDENTIALS";
 
         // Get user
-        public const string UserNotFound = "USER_NOT_FOUND";
-        public const string UserIdClaimNotFound = "USER_ID_CLAIM_NOT_FOUND";
-        public const string InvalidUserIdFormat = "INVALID_USER_ID_FORMAT";
+        public const string USER_NOT_FOUND = "USER_NOT_FOUND";
+        public const string USER_ID_CLAIM_NOT_FOUND = "USER_ID_CLAIM_NOT_FOUND";
+        public const string INVALID_USER_ID_FORMAT = "INVALID_USER_ID_FORMAT";
 
         // Refresh token
-        public const string NoRefreshTokenProvided = "NO_REFRESH_TOKEN_PROVIDED";
-        public const string InvalidRefreshToken = "INVALID_REFRESH_TOKEN";
+        public const string NO_REFRESH_TOKEN_PROVIDED = "NO_REFRESH_TOKEN_PROVIDED";
+        public const string INVALID_REFRESH_TOKEN = "INVALID_REFRESH_TOKEN";
 
         // Logout
-        public const string LogoutSuccess = "LOGOUT_SUCCESS";
+        public const string LOGOUT_SUCCESS = "LOGOUT_SUCCESS";
     }
 }
