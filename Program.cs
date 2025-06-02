@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
 using System.Text;
 using JwtAuth.Data;
 using JwtAuth.Services;
@@ -102,6 +103,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 // Dependency Injection
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICookieService, CookieService>();
+
+// Add HttpClient for Google Auth
+builder.Services.AddHttpClient(); // This registers IHttpClientFactory
+builder.Services.AddScoped<IOAuthService, OAuthService>();
 
 var app = builder.Build();
 

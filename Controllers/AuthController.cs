@@ -3,7 +3,6 @@ using JwtAuth.Models;
 using JwtAuth.Services;
 using JwtAuth.Constants;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Logging;
 
 namespace JwtAuth.Controllers
 {
@@ -11,6 +10,7 @@ namespace JwtAuth.Controllers
     [ApiController]
     public class AuthController(
         IAuthService authService,
+        IOAuthService oAuthService,
         ICookieService cookieService,
         IConfiguration configuration,
         ILogger<AuthController> logger) : ControllerBase
@@ -135,6 +135,32 @@ namespace JwtAuth.Controllers
             cookieService.ClearAuthCookies(Response, _isProduction);
 
             return Ok(result.Message);
+        }
+
+        [HttpPost("google")]
+        public async Task<ActionResult<UserResponseDto>> GoogleLogin([FromBody] GoogleAuthRequest request)
+        {
+            // 1. Exchange code for tokens using OAuthService
+            var tokenResponse = await oAuthService.ExchangeCodeForTokensAsync(request.Code);
+
+            // 2. Authenticate with ID token using AuthService
+            var authResult = await authService.GoogleLoginAsync(tokenResponse.Id_token);
+
+            if (!authResult.IsSuccess)
+            {
+                return Unauthorized(authResult.Message);
+            }
+
+            // 3. Set cookies and return user info
+            var authData = authResult.Data!;
+            cookieService.SetAuthCookies(Response, authData.AccessToken, authData.RefreshToken, _isProduction);
+
+            return Ok(new UserResponseDto
+            {
+                Id = authData.User!.Id,
+                Username = authData.User.Username,
+                Role = authData.User.Role
+            });
         }
 
         [Authorize]

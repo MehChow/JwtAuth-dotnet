@@ -6,9 +6,11 @@ using JwtAuth.Data;
 using JwtAuth.Entities;
 using JwtAuth.Models;
 using JwtAuth.Constants;
+using JwtAuth.Exceptions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Google.Apis.Auth;
 
 namespace JwtAuth.Services
 {
@@ -209,6 +211,104 @@ namespace JwtAuth.Services
                 logger.LogError(ex, "Unexpected error while refreshing token.");
                 return new ServiceResult<AuthInternalResponse> { IsSuccess = false, Message = "Token refresh failed due to an unexpected error." };
             }
+        }
+
+        // GOOGLE OAUTH
+        public async Task<ServiceResult<AuthInternalResponse>> GoogleLoginAsync(string idToken)
+        {
+            try
+            {
+                // Validate ID token
+                var payload = await ValidateGoogleIdTokenAsync(idToken);
+
+                // Find or create user
+                var user = await FindOrCreateGoogleUserAsync(payload);
+
+                // Generate tokens
+                var accessToken = CreateToken(user);
+                var refreshToken = await GenerateAndSaveRefreshTokenAsync(user);
+
+                return new ServiceResult<AuthInternalResponse>
+                {
+                    IsSuccess = true,
+                    Data = new AuthInternalResponse
+                    {
+                        AccessToken = accessToken,
+                        RefreshToken = refreshToken,
+                        User = user
+                    }
+                };
+            }
+            catch (InvalidJwtException ex)
+            {
+                logger.LogError(ex, "Invalid Google ID token");
+                return new ServiceResult<AuthInternalResponse>
+                {
+                    IsSuccess = false,
+                    Message = AuthMessages.INVALID_GOOGLE_CRED
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error during Google login");
+                return new ServiceResult<AuthInternalResponse>
+                {
+                    IsSuccess = false,
+                    Message = AuthMessages.GOOGLE_LOGIN_FAILED
+                };
+            }
+        }
+
+        public async Task<GoogleJsonWebSignature.Payload> ValidateGoogleIdTokenAsync(string idToken)
+        {
+            return await GoogleJsonWebSignature.ValidateAsync(idToken, new()
+            {
+                Audience = [configuration["Authentication:Google:ClientId"]
+                ?? throw new ConfigMissingException("Google:ClientId")],
+                IssuedAtClockTolerance = TimeSpan.FromMinutes(5),
+            });
+        }
+
+        public async Task<User> FindOrCreateGoogleUserAsync(GoogleJsonWebSignature.Payload payload)
+        {
+            if (string.IsNullOrEmpty(payload.Email))
+                throw new AuthException("Google ID token missing email");
+
+            // Try to find by Google ID first
+            var user = await context.Users
+                .FirstOrDefaultAsync(u => u.Provider == "Google" && u.ProviderId == payload.Subject);
+
+            if (user == null)
+            {
+                // Then try by email
+                user = await context.Users
+                    .FirstOrDefaultAsync(u => u.Username == payload.Email);
+
+                if (user != null)
+                {
+                    // Link existing account with Google
+                    user.Provider = "Google";
+                    user.ProviderId = payload.Subject;
+                    await context.SaveChangesAsync();
+                }
+            }
+
+            if (user == null)
+            {
+                // Create new user
+                user = new User
+                {
+                    Username = payload.Email,
+                    Provider = "Google",
+                    ProviderId = payload.Subject,
+                    PasswordHash = null // No password for Google users
+                };
+
+                context.Users.Add(user);
+                await context.SaveChangesAsync();
+            }
+
+            return user;
         }
 
         // HELPER METHODS BELOW

@@ -19,5 +19,9 @@
 
         // Logout
         public const string LOGOUT_SUCCESS = "LOGOUT_SUCCESS";
+
+        // Google OAuth
+        public const string INVALID_GOOGLE_CRED = "INVALID_GOOGLE_CREDENTIAL";
+        public const string GOOGLE_LOGIN_FAILED = "GOOGLE_LOGIN_FAILED";
     }
 }

@@ -692,3 +692,10 @@ C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\obj\Debug\net9.0\refint\JwtAu
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\obj\Debug\net9.0\JwtAuth.pdb
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\obj\Debug\net9.0\JwtAuth.genruntimeconfig.cache
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\obj\Debug\net9.0\ref\JwtAuth.dll
+C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\Google.Apis.dll
+C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\Google.Apis.Auth.dll
+C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\Google.Apis.Core.dll
+C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\Newtonsoft.Json.dll
+C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\System.Management.dll
+C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\runtimes\win\lib\net7.0\System.Management.dll
+C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt
