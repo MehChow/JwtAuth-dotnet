@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\meh-ecommerce\\JwtAuth-dotnet\\JwtAuth.csproj": {}
+    "C:\\Users\\User\\Desktop\\meh-ecommerce\\JwtAuth-dotnet\\JwtAuth.csproj": {}
   },
   "projects": {
-    "C:\\meh-ecommerce\\JwtAuth-dotnet\\JwtAuth.csproj": {
+    "C:\\Users\\User\\Desktop\\meh-ecommerce\\JwtAuth-dotnet\\JwtAuth.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\meh-ecommerce\\JwtAuth-dotnet\\JwtAuth.csproj",
+        "projectUniqueName": "C:\\Users\\User\\Desktop\\meh-ecommerce\\JwtAuth-dotnet\\JwtAuth.csproj",
         "projectName": "JwtAuth",
-        "projectPath": "C:\\meh-ecommerce\\JwtAuth-dotnet\\JwtAuth.csproj",
-        "packagesPath": "C:\\Users\\micha\\.nuget\\packages\\",
-        "outputPath": "C:\\meh-ecommerce\\JwtAuth-dotnet\\obj\\",
+        "projectPath": "C:\\Users\\User\\Desktop\\meh-ecommerce\\JwtAuth-dotnet\\JwtAuth.csproj",
+        "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\User\\Desktop\\meh-ecommerce\\JwtAuth-dotnet\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\micha\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -44,7 +44,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.300"
+        "SdkAnalysisLevel": "9.0.200"
       },
       "frameworks": {
         "net9.0": {
@@ -67,6 +67,12 @@
               "version": "[9.0.5, )"
             },
             "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[9.0.5, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
               "target": "Package",
               "version": "[9.0.5, )"
             },
@@ -112,7 +118,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.300/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

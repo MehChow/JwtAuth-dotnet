@@ -574,7 +574,7 @@
       "Microsoft.EntityFrameworkCore.Analyzers/9.0.5": {
         "type": "package"
       },
-      "Microsoft.EntityFrameworkCore.Design/9.0.3": {
+      "Microsoft.EntityFrameworkCore.Design/9.0.5": {
         "type": "package",
         "dependencies": {
           "Humanizer.Core": "2.14.1",
@@ -583,13 +583,13 @@
           "Microsoft.CodeAnalysis.CSharp": "4.8.0",
           "Microsoft.CodeAnalysis.CSharp.Workspaces": "4.8.0",
           "Microsoft.CodeAnalysis.Workspaces.MSBuild": "4.8.0",
-          "Microsoft.EntityFrameworkCore.Relational": "9.0.3",
-          "Microsoft.Extensions.Caching.Memory": "9.0.3",
-          "Microsoft.Extensions.Configuration.Abstractions": "9.0.3",
-          "Microsoft.Extensions.DependencyModel": "9.0.3",
-          "Microsoft.Extensions.Logging": "9.0.3",
+          "Microsoft.EntityFrameworkCore.Relational": "9.0.5",
+          "Microsoft.Extensions.Caching.Memory": "9.0.5",
+          "Microsoft.Extensions.Configuration.Abstractions": "9.0.5",
+          "Microsoft.Extensions.DependencyModel": "9.0.5",
+          "Microsoft.Extensions.Logging": "9.0.5",
           "Mono.TextTemplating": "3.0.0",
-          "System.Text.Json": "9.0.3"
+          "System.Text.Json": "9.0.5"
         },
         "compile": {
           "lib/net8.0/_._": {
@@ -748,7 +748,7 @@
           "buildTransitive/net8.0/_._": {}
         }
       },
-      "Microsoft.Extensions.DependencyModel/9.0.3": {
+      "Microsoft.Extensions.DependencyModel/9.0.5": {
         "type": "package",
         "compile": {
           "lib/net9.0/_._": {
@@ -2873,10 +2873,10 @@
         "microsoft.entityframeworkcore.analyzers.nuspec"
       ]
     },
-    "Microsoft.EntityFrameworkCore.Design/9.0.3": {
-      "sha512": "n5ZrAZ4RFELxYjJxN74lzmFlRrtSpYEYZfZcIJIWPGjSigwJsbya2CnOdjSVDPyfx3rKl9rzbd72D2DNHBJWeA==",
+    "Microsoft.EntityFrameworkCore.Design/9.0.5": {
+      "sha512": "xOVWCGRF8DpOIoZ196/g7bdghc2e7Fp6R2vZPKndWv8A64bSDSaS7F2CUoqZpmSphUeT+1HDRpNYFRBQd8H71g==",
       "type": "package",
-      "path": "microsoft.entityframeworkcore.design/9.0.3",
+      "path": "microsoft.entityframeworkcore.design/9.0.5",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -2885,7 +2885,7 @@
         "build/net8.0/Microsoft.EntityFrameworkCore.Design.props",
         "lib/net8.0/Microsoft.EntityFrameworkCore.Design.dll",
         "lib/net8.0/Microsoft.EntityFrameworkCore.Design.xml",
-        "microsoft.entityframeworkcore.design.9.0.3.nupkg.sha512",
+        "microsoft.entityframeworkcore.design.9.0.5.nupkg.sha512",
         "microsoft.entityframeworkcore.design.nuspec"
       ]
     },
@@ -3088,10 +3088,10 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "Microsoft.Extensions.DependencyModel/9.0.3": {
-      "sha512": "194P+NOekDXrPHmM2R8678T4bRfZ2isQXDDAsXKE5qI0QLUnXbwB0upljAkyxk+Kkt1DV1tV+9tHOtHEEh3ksw==",
+    "Microsoft.Extensions.DependencyModel/9.0.5": {
+      "sha512": "+jdJ9Vz+5Ia21l3KjahtmeHCIgQ7urfkdcJPxSfeqB40Jqryi27Lt4fKBmKyvc0YrfTUJ0cEB7QmoQRlU8FH0g==",
       "type": "package",
-      "path": "microsoft.extensions.dependencymodel/9.0.3",
+      "path": "microsoft.extensions.dependencymodel/9.0.5",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -3111,7 +3111,7 @@
         "lib/net9.0/Microsoft.Extensions.DependencyModel.xml",
         "lib/netstandard2.0/Microsoft.Extensions.DependencyModel.dll",
         "lib/netstandard2.0/Microsoft.Extensions.DependencyModel.xml",
-        "microsoft.extensions.dependencymodel.9.0.3.nupkg.sha512",
+        "microsoft.extensions.dependencymodel.9.0.5.nupkg.sha512",
         "microsoft.extensions.dependencymodel.nuspec",
         "useSharedDesignerContext.txt"
       ]
@@ -4680,6 +4680,7 @@
       "Microsoft.AspNetCore.Authentication.Twitter >= 9.0.5",
       "Microsoft.AspNetCore.OpenApi >= 9.0.5",
       "Microsoft.EntityFrameworkCore >= 9.0.5",
+      "Microsoft.EntityFrameworkCore.Design >= 9.0.5",
       "Microsoft.EntityFrameworkCore.SqlServer >= 9.0.5",
       "Microsoft.EntityFrameworkCore.Tools >= 9.0.3",
       "Microsoft.VisualStudio.Azure.Containers.Tools.Targets >= 1.21.0",
@@ -4688,23 +4689,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\micha\\.nuget\\packages\\": {},
+    "C:\\Users\\User\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\meh-ecommerce\\JwtAuth-dotnet\\JwtAuth.csproj",
+      "projectUniqueName": "C:\\Users\\User\\Desktop\\meh-ecommerce\\JwtAuth-dotnet\\JwtAuth.csproj",
       "projectName": "JwtAuth",
-      "projectPath": "C:\\meh-ecommerce\\JwtAuth-dotnet\\JwtAuth.csproj",
-      "packagesPath": "C:\\Users\\micha\\.nuget\\packages\\",
-      "outputPath": "C:\\meh-ecommerce\\JwtAuth-dotnet\\obj\\",
+      "projectPath": "C:\\Users\\User\\Desktop\\meh-ecommerce\\JwtAuth-dotnet\\JwtAuth.csproj",
+      "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\User\\Desktop\\meh-ecommerce\\JwtAuth-dotnet\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\micha\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -4731,7 +4732,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "9.0.300"
+      "SdkAnalysisLevel": "9.0.200"
     },
     "frameworks": {
       "net9.0": {
@@ -4754,6 +4755,12 @@
             "version": "[9.0.5, )"
           },
           "Microsoft.EntityFrameworkCore": {
+            "target": "Package",
+            "version": "[9.0.5, )"
+          },
+          "Microsoft.EntityFrameworkCore.Design": {
+            "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+            "suppressParent": "All",
             "target": "Package",
             "version": "[9.0.5, )"
           },
@@ -4799,7 +4806,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.300/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
