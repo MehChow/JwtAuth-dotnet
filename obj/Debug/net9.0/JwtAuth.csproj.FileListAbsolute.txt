@@ -510,10 +510,10 @@ C:\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\out\out\appsettings.json
 C:\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\out\out\JwtAuth.deps.json
 C:\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\out\out\JwtAuth.runtimeconfig.json
 C:\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\out\out\JwtAuth.staticwebassets.endpoints.json
-C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\appsettings.Development.json
-C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\appsettings.json
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\out\out\web.config
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\out\web.config
+C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\appsettings.Development.json
+C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\appsettings.json
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\out\appsettings.Development.json
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\out\appsettings.json
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\out\JwtAuth.deps.json
@@ -532,6 +532,9 @@ C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\JwtAuth.dll
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\JwtAuth.pdb
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\Azure.Core.dll
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\Azure.Identity.dll
+C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\Google.Apis.dll
+C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\Google.Apis.Auth.dll
+C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\Google.Apis.Core.dll
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\Humanizer.dll
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\Microsoft.AspNetCore.Authentication.Google.dll
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
@@ -573,6 +576,7 @@ C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\Microsoft.Op
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\Microsoft.SqlServer.Server.dll
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\Microsoft.Win32.SystemEvents.dll
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\Mono.TextTemplating.dll
+C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\Newtonsoft.Json.dll
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\Scalar.AspNetCore.dll
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\System.ClientModel.dll
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\System.CodeDom.dll
@@ -585,6 +589,7 @@ C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\System.Confi
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\System.Drawing.Common.dll
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\System.Formats.Asn1.dll
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\System.IdentityModel.Tokens.Jwt.dll
+C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\System.Management.dll
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\System.Memory.Data.dll
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\System.Runtime.Caching.dll
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\System.Security.Cryptography.ProtectedData.dll
@@ -665,6 +670,7 @@ C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\runtimes\win
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\runtimes\win\lib\net6.0\Microsoft.Win32.SystemEvents.dll
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\runtimes\unix\lib\net6.0\System.Drawing.Common.dll
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\runtimes\win\lib\net6.0\System.Drawing.Common.dll
+C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\runtimes\win\lib\net7.0\System.Management.dll
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\runtimes\win\lib\net6.0\System.Runtime.Caching.dll
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\runtimes\win\lib\net6.0\System.Security.Cryptography.ProtectedData.dll
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\runtimes\win\lib\net6.0\System.Windows.Extensions.dll
@@ -692,9 +698,3 @@ C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\obj\Debug\net9.0\refint\JwtAu
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\obj\Debug\net9.0\JwtAuth.pdb
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\obj\Debug\net9.0\JwtAuth.genruntimeconfig.cache
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\obj\Debug\net9.0\ref\JwtAuth.dll
-C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\Google.Apis.dll
-C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\Google.Apis.Auth.dll
-C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\Google.Apis.Core.dll
-C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\Newtonsoft.Json.dll
-C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\System.Management.dll
-C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\runtimes\win\lib\net7.0\System.Management.dll

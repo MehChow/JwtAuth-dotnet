@@ -31,7 +31,8 @@ namespace JwtAuth.Services
                 {
                     Email = request.Email,
                     Username = ExtractUsernameFromEmail(request.Email),
-                    PasswordHash = new PasswordHasher<User>().HashPassword(null!, request.Password)
+                    PasswordHash = new PasswordHasher<User>().HashPassword(null!, request.Password),
+                    CreatedAt = DateTime.UtcNow
                 };
 
                 context.Users.Add(user);
@@ -303,7 +304,8 @@ namespace JwtAuth.Services
                     Email = payload.Email,
                     Provider = "Google",
                     ProviderId = payload.Subject,
-                    PasswordHash = null // No password for Google users
+                    PasswordHash = null, // No password for Google users
+                    CreatedAt = DateTime.UtcNow
                 };
 
                 context.Users.Add(user);
