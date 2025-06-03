@@ -41,8 +41,21 @@ builder.Services.AddDbContext<UserDbContext>(options =>
     {
         throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
     }
-    options.UseSqlServer(connectionString);
+    
+    // Add this to handle Railway's PostgreSQL connection
+    if (connectionString.Contains("railway.app"))
+    {
+        options.UseNpgsql(connectionString); // Use PostgreSQL instead of SQL Server
+    }
+    else
+    {
+        options.UseSqlServer(connectionString); // Keep SQL Server for local development
+    }
 });
+
+// Add this to your services
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<UserDbContext>();
 
 builder.Services.AddLogging();
 builder.Services.AddHttpContextAccessor();
@@ -153,5 +166,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHealthChecks("/health");
 
 app.Run();

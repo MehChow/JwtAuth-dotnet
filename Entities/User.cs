@@ -11,5 +11,6 @@
         public string? ProviderId { get; set; } // Unique ID from OAuth provider
         public List<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>(); // Navigation property
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; }
     }
 }
