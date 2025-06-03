@@ -698,4 +698,3 @@ C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\Google.Apis.
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\Newtonsoft.Json.dll
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\System.Management.dll
 C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\bin\Debug\net9.0\runtimes\win\lib\net7.0\System.Management.dll
-C:\Users\User\Desktop\meh-ecommerce\JwtAuth-dotnet\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt

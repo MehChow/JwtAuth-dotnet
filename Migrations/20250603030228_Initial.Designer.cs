@@ -12,18 +12,31 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JwtAuth.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20250529092040_AddRefreshTokens")]
-    partial class AddRefreshTokens
+    [Migration("20250603030228_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.3")
+                .HasAnnotation("ProductVersion", "9.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("JwtAuth.Entities.BlacklistedToken", b =>
+                {
+                    b.Property<string>("Jti")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Jti");
+
+                    b.ToTable("BlacklistedTokens");
+                });
 
             modelBuilder.Entity("JwtAuth.Entities.RefreshToken", b =>
                 {
@@ -70,12 +83,6 @@ namespace JwtAuth.Migrations
 
                     b.Property<string>("ProviderId")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RefreshToken")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("RefreshTokenExpiryTime")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("Role")
                         .IsRequired()

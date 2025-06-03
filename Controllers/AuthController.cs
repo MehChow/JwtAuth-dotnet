@@ -3,6 +3,7 @@ using JwtAuth.Models;
 using JwtAuth.Services;
 using JwtAuth.Constants;
 using Microsoft.AspNetCore.Authorization;
+using JwtAuth.Entities;
 
 namespace JwtAuth.Controllers
 {
@@ -23,24 +24,29 @@ namespace JwtAuth.Controllers
             var result = await authService.RegisterAsync(request);
             if (!result.IsSuccess)
             {
-                if (result.Message == AuthMessages.USERNAME_ALREADY_EXISTS)
+                logger.LogWarning("Registration failed: {Message}", result.Message);
+
+                // Email already in use
+                if (result.Message == AuthMessages.EMAIL_ALREADY_INUSED)
                 {
-                    return Conflict(result.Message);
+                    return Conflict(new AuthErrorResponse
+                    {
+                        Message = "This email is already registered",
+                        Code = "EMAIL_IN_USE"
+                    });
                 }
-                return StatusCode(500, result.Message);
+
+                return StatusCode(500, new AuthErrorResponse
+                {
+                    Message = "Registration failed. Please try again later.",
+                    Code = "REGISTRATION_ERROR"
+                });
             }
 
-            var requestResponse = result.Data;
+            var requestResponse = result.Data!;
             cookieService.SetAuthCookies(Response, requestResponse.AccessToken, requestResponse.RefreshToken, _isProduction);
 
-            var userResponse = new UserResponseDto
-            {
-                Id = requestResponse.User.Id,
-                Username = requestResponse.User.Username,
-                Role = requestResponse.User.Role
-            };
-
-            return Ok(userResponse);
+            return Ok(MapToUserResponse(requestResponse.User!));
         }
 
         [HttpPost("login")]
@@ -49,24 +55,29 @@ namespace JwtAuth.Controllers
             var result = await authService.LoginAsync(request);
             if (!result.IsSuccess)
             {
+                logger.LogWarning("Login failed: {Message}", result.Message);
+
+                // Invalid credentials
                 if (result.Message == AuthMessages.INVALID_CREDENTIALS)
                 {
-                    return Unauthorized(result.Message);
+                    return Unauthorized(new AuthErrorResponse
+                    {
+                        Message = "Invalid email or password",
+                        Code = "INVALID_CREDENTIALS"
+                    });
                 }
-                return StatusCode(500, result.Message);
+
+                return StatusCode(500, new AuthErrorResponse
+                {
+                    Message = "Login failed. Please try again later.",
+                    Code = "LOGIN_ERROR"
+                });
             }
 
             var loginResponse = result.Data!;
             cookieService.SetAuthCookies(Response, loginResponse.AccessToken, loginResponse.RefreshToken, _isProduction);
 
-            var userResponse = new UserResponseDto
-            {
-                Id = loginResponse.User.Id,
-                Username = loginResponse.User.Username,
-                Role = loginResponse.User.Role
-            };
-
-            return Ok(userResponse);
+            return Ok(MapToUserResponse(loginResponse.User!));
         }
 
         [Authorize]
@@ -76,21 +87,21 @@ namespace JwtAuth.Controllers
             var result = await authService.GetUserInfoAsync();
             if (!result.IsSuccess)
             {
-                if (result.Message == AuthMessages.INVALID_USER_ID_FORMAT)
+                logger.LogWarning("Failed to get user info: {Message}", result.Message);
+
+                // Return generic error for users
+                return StatusCode(500, new AuthErrorResponse
                 {
-                    return Unauthorized(result.Message);
-                }
-                if (result.Message == AuthMessages.USER_NOT_FOUND)
-                {
-                    return NotFound(result.Message);
-                }
-                return StatusCode(500, result.Message);
+                    Message = "Unable to retrieve user information. Please try logging in again.",
+                    Code = "AUTH_ERROR"
+                });
             }
 
             var user = result.Data!;
             var userResponse = new UserResponseDto
             {
                 Id = user.Id,
+                Email = user.Email,
                 Username = user.Username,
                 Role = user.Role
             };
@@ -104,24 +115,40 @@ namespace JwtAuth.Controllers
             var refreshToken = Request.Cookies["refreshToken"];
             if (string.IsNullOrEmpty(refreshToken))
             {
-                return BadRequest(AuthMessages.NO_REFRESH_TOKEN_PROVIDED);
+                // No refresh token provided
+                return BadRequest(new AuthErrorResponse
+                {
+                    Message = "No refresh token provided",
+                    Code = "NO_REFRESH_TOKEN"
+                });
             }
 
             var result = await authService.RefreshTokenAsync(refreshToken);
             if (!result.IsSuccess)
             {
+                logger.LogWarning("Token refresh failed: {Message}", result.Message);
+
+                // Invalid refresh token
                 if (result.Message == AuthMessages.INVALID_REFRESH_TOKEN)
                 {
                     cookieService.ClearAuthCookies(Response, _isProduction);
-                    return Unauthorized(result.Message);
+                    return Unauthorized(new AuthErrorResponse
+                    {
+                        Message = "Session expired. Please log in again.",
+                        Code = "INVALID_REFRESH_TOKEN"
+                    });
                 }
-                return StatusCode(500, result.Message);
+
+                return StatusCode(500, new AuthErrorResponse
+                {
+                    Message = "Failed to refresh session. Please log in again.",
+                    Code = "REFRESH_ERROR"
+                });
             }
 
             var response = result.Data!;
             cookieService.SetAuthCookies(Response, response.AccessToken, response.RefreshToken, _isProduction);
 
-            logger.LogInformation("Set-Cookie headers: {Headers}", string.Join(", ", Response.Headers["Set-Cookie"].ToArray()));
             return Ok();
         }
 
@@ -131,36 +158,55 @@ namespace JwtAuth.Controllers
             var refreshToken = Request.Cookies["refreshToken"];
             var accessToken = Request.Cookies["accessToken"];
 
-            var result = await authService.LogoutAsync(refreshToken, accessToken);
+            // Nothing needs to be return from service, just clear cookies
+            await authService.LogoutAsync(refreshToken, accessToken);
             cookieService.ClearAuthCookies(Response, _isProduction);
 
-            return Ok(result.Message);
+            return Ok(new AuthErrorResponse
+            {
+                Message = "Successfully logged out",
+                Code = "LOGOUT_SUCCESS"
+            });
         }
 
         [HttpPost("google")]
         public async Task<ActionResult<UserResponseDto>> GoogleLogin([FromBody] GoogleAuthRequest request)
         {
-            // 1. Exchange code for tokens using OAuthService
-            var tokenResponse = await oAuthService.ExchangeCodeForTokensAsync(request.Code);
-
-            // 2. Authenticate with ID token using AuthService
-            var authResult = await authService.GoogleLoginAsync(tokenResponse.Id_token);
-
-            if (!authResult.IsSuccess)
+            // need a trycatch block because it's making a HTTP requests to Google's servers
+            // If fails, error will be caught and logged
+            try
             {
-                return Unauthorized(authResult.Message);
+                // 1. Exchange code for tokens using OAuthService
+                var tokenResponse = await oAuthService.ExchangeCodeForTokensAsync(request.Code);
+
+                // 2. Authenticate with ID token using AuthService
+                var authResult = await authService.GoogleLoginAsync(tokenResponse.Id_token);
+
+                if (!authResult.IsSuccess)
+                {
+                    logger.LogWarning("Google login failed: {Message}", authResult.Message);
+                    return Unauthorized(new AuthErrorResponse
+                    {
+                        Message = "Google authentication failed. Please try again.",
+                        Code = "GOOGLE_AUTH_ERROR"
+                    });
+                }
+
+                // 3. Set cookies and return user info
+                var authData = authResult.Data!;
+                cookieService.SetAuthCookies(Response, authData.AccessToken, authData.RefreshToken, _isProduction);
+
+                return Ok(MapToUserResponse(authData.User!));
             }
+            catch (Exception ex) {
+                logger.LogError(ex, "Unexpected error during Google login");
 
-            // 3. Set cookies and return user info
-            var authData = authResult.Data!;
-            cookieService.SetAuthCookies(Response, authData.AccessToken, authData.RefreshToken, _isProduction);
-
-            return Ok(new UserResponseDto
-            {
-                Id = authData.User!.Id,
-                Username = authData.User.Username,
-                Role = authData.User.Role
-            });
+                return StatusCode(500, new AuthErrorResponse
+                {
+                    Message = "Google authentication failed. Please try again later.",
+                    Code = "GOOGLE_AUTH_ERROR"
+                });
+            }
         }
 
         [Authorize]
@@ -175,6 +221,18 @@ namespace JwtAuth.Controllers
         public IActionResult AdminOnlyEndpoint()
         {
             return Ok("You are an admin!!");
+        }
+
+        // Helper method to map User to UserResponseDto
+        private static UserResponseDto MapToUserResponse(User user)
+        {
+            return new UserResponseDto
+            {
+                Id = user.Id,
+                Email = user.Email,
+                Username = user.Username,
+                Role = user.Role
+            };
         }
     }   
 }

@@ -21,15 +21,16 @@ namespace JwtAuth.Services
         {
             try
             {
-                // Check if the username already exists
-                if (await context.Users.AnyAsync(u => u.Username == request.Username))
+                // Check if the email is already in used
+                if (await context.Users.AnyAsync(u => u.Email == request.Email))
                 {
-                    return new ServiceResult<AuthInternalResponse> { IsSuccess = false, Message = AuthMessages.USERNAME_ALREADY_EXISTS };
+                    return new ServiceResult<AuthInternalResponse> { IsSuccess = false, Message = AuthMessages.EMAIL_ALREADY_INUSED };
                 }
 
                 var user = new User
                 {
-                    Username = request.Username,
+                    Email = request.Email,
+                    Username = ExtractUsernameFromEmail(request.Email),
                     PasswordHash = new PasswordHasher<User>().HashPassword(null!, request.Password)
                 };
 
@@ -51,12 +52,12 @@ namespace JwtAuth.Services
             }
             catch (DbUpdateException ex)
             {
-                logger.LogError(ex, "Failed to register user {Username} due to database update error.", request.Username);
+                logger.LogError(ex, "Failed to register user {Username} due to database update error.", request.Email);
                 return new ServiceResult<AuthInternalResponse> { IsSuccess = false, Message = "Registration failed due to a server error. Please try again later." };
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Unexpected error while registering user {Username}.", request.Username);
+                logger.LogError(ex, "Unexpected error while registering user {Username}.", request.Email);
                 return new ServiceResult<AuthInternalResponse> { IsSuccess = false, Message = "Registration failed due to an unexpected error. Please try again later." };
             }
         }
@@ -67,7 +68,7 @@ namespace JwtAuth.Services
             try
             {
                 // User not exist
-                var user = await context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
+                var user = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
                 if (user == null)
                 {
                     return new ServiceResult<AuthInternalResponse> { IsSuccess = false, Message = AuthMessages.INVALID_CREDENTIALS };
@@ -104,7 +105,7 @@ namespace JwtAuth.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Unexpected error while logging in user {Username}.", request.Username);
+                logger.LogError(ex, "Unexpected error while logging in email {Email}.", request.Email);
                 return new ServiceResult<AuthInternalResponse> { IsSuccess = false, Message = "Login failed due to an unexpected error. Please try again later." };
             }
         }
@@ -282,7 +283,7 @@ namespace JwtAuth.Services
             {
                 // Then try by email
                 user = await context.Users
-                    .FirstOrDefaultAsync(u => u.Username == payload.Email);
+                    .FirstOrDefaultAsync(u => u.Email == payload.Email);
 
                 if (user != null)
                 {
@@ -298,7 +299,8 @@ namespace JwtAuth.Services
                 // Create new user
                 user = new User
                 {
-                    Username = payload.Email,
+                    Username = payload.Name,
+                    Email = payload.Email,
                     Provider = "Google",
                     ProviderId = payload.Subject,
                     PasswordHash = null // No password for Google users
@@ -398,6 +400,14 @@ namespace JwtAuth.Services
             var bytes = Encoding.UTF8.GetBytes(token);
             var hash = SHA256.HashData(bytes);
             return Convert.ToBase64String(hash);
+        }
+
+        private static string ExtractUsernameFromEmail(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+                throw new ArgumentException("Email cannot be null or empty.", nameof(email));
+            var atIndex = email.IndexOf('@');
+            return atIndex > 0 ? email[..atIndex] : email;
         }
     }
 }

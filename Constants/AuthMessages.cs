@@ -3,7 +3,7 @@
     public static class AuthMessages
     {
         // Register
-        public const string USERNAME_ALREADY_EXISTS = "USERNAME_ALREADY_EXISTS";
+        public const string EMAIL_ALREADY_INUSED = "EMAIL_ALREADY_INUSED";
 
         // Login
         public const string INVALID_CREDENTIALS = "INVALID_CREDENTIALS";

@@ -3,16 +3,12 @@
   "WorkspaceRootPath": "C:\\Users\\User\\Desktop\\meh-ecommerce\\JwtAuth-dotnet\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{7BFDCD54-0CF3-408C-9AEC-A5A36217FBB4}|JwtAuth.csproj|c:\\users\\user\\desktop\\meh-ecommerce\\jwtauth-dotnet\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7BFDCD54-0CF3-408C-9AEC-A5A36217FBB4}|JwtAuth.csproj|solutionrelative:controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{7BFDCD54-0CF3-408C-9AEC-A5A36217FBB4}|JwtAuth.csproj|c:\\users\\user\\desktop\\meh-ecommerce\\jwtauth-dotnet\\entities\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7BFDCD54-0CF3-408C-9AEC-A5A36217FBB4}|JwtAuth.csproj|solutionrelative:entities\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{7BFDCD54-0CF3-408C-9AEC-A5A36217FBB4}|JwtAuth.csproj|c:\\users\\user\\desktop\\meh-ecommerce\\jwtauth-dotnet\\services\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{7BFDCD54-0CF3-408C-9AEC-A5A36217FBB4}|JwtAuth.csproj|solutionrelative:services\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7BFDCD54-0CF3-408C-9AEC-A5A36217FBB4}|JwtAuth.csproj|c:\\users\\user\\desktop\\meh-ecommerce\\jwtauth-dotnet\\services\\iauthservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7BFDCD54-0CF3-408C-9AEC-A5A36217FBB4}|JwtAuth.csproj|solutionrelative:services\\iauthservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -27,14 +23,14 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "AuthController.cs",
-              "DocumentMoniker": "C:\\Users\\User\\Desktop\\meh-ecommerce\\JwtAuth-dotnet\\Controllers\\AuthController.cs",
-              "RelativeDocumentMoniker": "Controllers\\AuthController.cs",
-              "ToolTip": "C:\\Users\\User\\Desktop\\meh-ecommerce\\JwtAuth-dotnet\\Controllers\\AuthController.cs",
-              "RelativeToolTip": "Controllers\\AuthController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAVAAAAAAAAAA==",
+              "Title": "User.cs",
+              "DocumentMoniker": "C:\\Users\\User\\Desktop\\meh-ecommerce\\JwtAuth-dotnet\\Entities\\User.cs",
+              "RelativeDocumentMoniker": "Entities\\User.cs",
+              "ToolTip": "C:\\Users\\User\\Desktop\\meh-ecommerce\\JwtAuth-dotnet\\Entities\\User.cs",
+              "RelativeToolTip": "Entities\\User.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-02T09:40:00.7Z",
+              "WhenOpened": "2025-06-03T02:45:47.688Z",
               "EditorCaption": ""
             },
             {
@@ -45,28 +41,9 @@
               "RelativeDocumentMoniker": "Services\\AuthService.cs",
               "ToolTip": "C:\\Users\\User\\Desktop\\meh-ecommerce\\JwtAuth-dotnet\\Services\\AuthService.cs",
               "RelativeToolTip": "Services\\AuthService.cs",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAAAAoAAAAkAAAAAAAAAA==",
+              "ViewState": "AgIAAAUBAAAAAAAAAAAmwCQBAAARAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-02T09:29:36.118Z",
-              "EditorCaption": ""
-            }
-          ]
-        },
-        {
-          "DockedWidth": 207,
-          "SelectedChildIndex": 0,
-          "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "IAuthService.cs",
-              "DocumentMoniker": "C:\\Users\\User\\Desktop\\meh-ecommerce\\JwtAuth-dotnet\\Services\\IAuthService.cs",
-              "RelativeDocumentMoniker": "Services\\IAuthService.cs",
-              "ToolTip": "C:\\Users\\User\\Desktop\\meh-ecommerce\\JwtAuth-dotnet\\Services\\IAuthService.cs",
-              "RelativeToolTip": "Services\\IAuthService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-02T09:29:52.316Z",
+              "WhenOpened": "2025-06-03T02:42:12.392Z",
               "EditorCaption": ""
             }
           ]
