@@ -40,16 +40,15 @@ builder.Services.AddDbContext<UserDbContext>(options =>
     {
         throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
     }
-    
-    // Add this to handle Railway's PostgreSQL connection
-    if (connectionString.Contains("railway.app"))
+
+    // Use PostgreSQL for both local and production
+    options.UseNpgsql(connectionString, npgsqlOptions =>
     {
-        options.UseNpgsql(connectionString); // Use PostgreSQL instead of SQL Server
-    }
-    else
-    {
-        options.UseSqlServer(connectionString); // Keep SQL Server for local development
-    }
+        npgsqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 3,
+            maxRetryDelay: TimeSpan.FromSeconds(30),
+            errorCodesToAdd: null);
+    });
 });
 
 builder.Services.AddLogging();

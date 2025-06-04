@@ -8,7 +8,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__DefaultConnection=Server=db;Database=Meh-Ecommerce;User Id=sa;Password=Zz060400..;TrustServerCertificate=True;
+      - ConnectionStrings__DefaultConnection=Host=db;Database=Meh-Ecommerce;Username=postgres;Password=Zz060400..
       - Authentication__Google__ClientId=790546939881-p6dvtl1t2917pql5garo1o107de3o24f.apps.googleusercontent.com
       - Authentication__Google__ClientSecret=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
       - Authentication__Google__RedirectUri=http://localhost:3000
@@ -22,21 +22,21 @@ services:
       - app-network
 
   db:
-    image: mcr.microsoft.com/mssql/server:2022-latest
+    image: postgres:16
     environment:
-      - ACCEPT_EULA=Y
-      - SA_PASSWORD=Zz060400..
-      - MSSQL_PID=Express
+      - POSTGRES_DB=Meh-Ecommerce
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=Zz060400..
     ports:
-      - "1433:1433"
+      - "5432:5432"
     volumes:
-      - sql-data:/var/opt/mssql
+      - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "sh", "-c", "ps aux | grep '[s]qlservr'"]
-      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U postgres -d Meh-Ecommerce"]
+      interval: 5s
       timeout: 5s
       retries: 5
-      start_period: 60s # Increased to give SQL Server more time to start
+      start_period: 10s
     networks:
       - app-network
 
@@ -45,4 +45,4 @@ networks:
     driver: bridge
 
 volumes:
-  sql-data:
+  postgres-data:
