@@ -1,5 +1,4 @@
 using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http.Headers;
 using System.Text;
 using JwtAuth.Data;
 using JwtAuth.Services;
@@ -52,10 +51,6 @@ builder.Services.AddDbContext<UserDbContext>(options =>
         options.UseSqlServer(connectionString); // Keep SQL Server for local development
     }
 });
-
-// Add this to your services
-builder.Services.AddHealthChecks()
-    .AddDbContextCheck<UserDbContext>();
 
 builder.Services.AddLogging();
 builder.Services.AddHttpContextAccessor();
@@ -166,7 +161,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
-app.MapHealthChecks("/health");
 
 app.Run();
