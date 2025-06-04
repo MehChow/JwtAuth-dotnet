@@ -9,6 +9,12 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
       - ConnectionStrings__DefaultConnection=Server=db;Database=Meh-Ecommerce;User Id=sa;Password=Zz060400..;TrustServerCertificate=True;
+      - Authentication__Google__ClientId=790546939881-p6dvtl1t2917pql5garo1o107de3o24f.apps.googleusercontent.com
+      - Authentication__Google__ClientSecret=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
+      - Authentication__Google__RedirectUri=http://localhost:3000
+      - AppSettings__Token=NoiThatlooksfkinglongbrowtfhowLongITNEEDSTOBE!!!!!NoiThatlooksfkinglongbrowtfhowLongITNEEDSTOBE!!!!!NoiThatlooksfkinglongbrowtfhowLongITNEEDSTOBE!!!!!
+      - AppSettings__Issuer=MehJwt
+      - AppSettings__Audience=MehAudience
     depends_on:
       db:
         condition: service_healthy

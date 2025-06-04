@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JwtAuth.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20250603101218_InitialPostgresMigration")]
-    partial class InitialPostgresMigration
+    [Migration("20250604023831_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
