@@ -5,16 +5,14 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5216:8080"
-    env_file:
-      - .env
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__DefaultConnection=Host=db;Database=Meh-Ecommerce;Username=postgres;Password=${DB_PASSWORD}
-      - Authentication__Google__ClientId=${GOOGLE_CLIENT_ID}
-      - Authentication__Google__ClientSecret=${GOOGLE_CLIENT_SECRET}
+      - ConnectionStrings__DefaultConnection=Host=db;Database=Meh-Ecommerce;Username=postgres;Password=your_password_here
+      - Authentication__Google__ClientId=your_client_id_here
+      - Authentication__Google__ClientSecret=your_client_secret_here
       - Authentication__Google__RedirectUri=http://localhost:3000
-      - AppSettings__Token=NoiThatlooksfkinglongbrowtfhowLongITNEEDSTOBE!!!!!NoiThatlooksfkinglongbrowtfhowLongITNEEDSTOBE!!!!!NoiThatlooksfkinglongbrowtfhowLongITNEEDSTOBE!!!!!
+      - AppSettings__Token=your_token_here
       - AppSettings__Issuer=MehJwt
       - AppSettings__Audience=MehAudience
     depends_on:
@@ -28,7 +26,7 @@ services:
     environment:
       - POSTGRES_DB=Meh-Ecommerce
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_PASSWORD=your_password_here
     ports:
       - "5432:5432"
     volumes:

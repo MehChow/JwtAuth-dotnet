@@ -13,6 +13,10 @@
 *.nuget.targets
 project.nuget.cache
 
-appsettings.Development.json
-*.Development.json
-secrets.json
+# Ignore actual docker-compose.yml with sensitive data
+docker-compose.yml
+
+# But track the example file
+!docker-compose.example.yml
+
+.env
