@@ -13,10 +13,13 @@
 *.nuget.targets
 project.nuget.cache
 
-# Ignore actual docker-compose.yml with sensitive data
-docker-compose.yml
+# Ignore all docker-compose files
+docker-compose*.yml
 
 # But track the example file
 !docker-compose.example.yml
 
+# Ignore .env files
 .env
+.env.*
+!.env.example
