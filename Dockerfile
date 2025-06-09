@@ -11,7 +11,7 @@ RUN dotnet restore
 COPY . .
 RUN dotnet publish JwtAuth.csproj -c Release -o out
 
-# Use the same SDK image for runtime
+# Use the SDK image for runtime (not the runtime image)
 FROM mcr.microsoft.com/dotnet/sdk:9.0
 WORKDIR /app
 
@@ -24,16 +24,21 @@ RUN apt-get update && \
 RUN dotnet tool install --global dotnet-ef
 ENV PATH="${PATH}:/root/.dotnet/tools"
 
-# Copy the entire source code
-COPY . .
-
 # Copy the published app
 COPY --from=build /app/out .
 
-# Create migrations directory if it doesn't exist
-RUN mkdir -p Migrations
+# Copy the entire source code (needed for migrations)
+COPY . .
+
+# Create startup script
+RUN echo '#!/bin/bash\n\
+echo "Running database migrations..."\n\
+dotnet ef database update\n\
+echo "Starting application..."\n\
+dotnet JwtAuth.dll' > /app/start.sh && \
+chmod +x /app/start.sh
 
 # Expose the port the app runs on
 EXPOSE 8080
 
-ENTRYPOINT ["dotnet", "JwtAuth.dll"]
+ENTRYPOINT ["/app/start.sh"]

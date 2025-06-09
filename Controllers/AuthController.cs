@@ -223,6 +223,12 @@ namespace JwtAuth.Controllers
             return Ok("You are an admin!!");
         }
 
+        [HttpGet("health")]
+        public IActionResult HealthCheck()
+        {
+            return Ok("API is operational!!!");
+        }
+
         // Helper method to map User to UserResponseDto
         private static UserResponseDto MapToUserResponse(User user)
         {
