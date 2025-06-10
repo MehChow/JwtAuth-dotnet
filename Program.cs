@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
+using dotenv.net;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -136,12 +139,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 // Dependency Injection
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICookieService, CookieService>();
+builder.Services.AddScoped<IVideoService, VideoService>();
 
 // Add HttpClient for Google Auth
 builder.Services.AddHttpClient(); // This registers IHttpClientFactory
 builder.Services.AddScoped<IOAuthService, OAuthService>();
 
 var app = builder.Build();
+
+// Set Cloudinary credentials
+DotEnv.Load(options: new DotEnvOptions(probeForEnv: true));
+Cloudinary cloudinary = new Cloudinary(Environment.GetEnvironmentVariable("CLOUDINARY_URL"));
+cloudinary.Api.Secure = true;
 
 if (app.Environment.IsDevelopment())
 {

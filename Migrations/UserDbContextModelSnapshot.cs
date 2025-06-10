@@ -115,6 +115,42 @@ namespace JwtAuth.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("JwtAuth.Entities.Video", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Format")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PublicUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Videos");
+                });
+
             modelBuilder.Entity("JwtAuth.Entities.RefreshToken", b =>
                 {
                     b.HasOne("JwtAuth.Entities.User", "User")
@@ -126,9 +162,22 @@ namespace JwtAuth.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("JwtAuth.Entities.Video", b =>
+                {
+                    b.HasOne("JwtAuth.Entities.User", "User")
+                        .WithMany("Videos")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("JwtAuth.Entities.User", b =>
                 {
                     b.Navigation("RefreshTokens");
+
+                    b.Navigation("Videos");
                 });
 #pragma warning restore 612, 618
         }

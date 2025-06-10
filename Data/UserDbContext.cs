@@ -9,10 +9,11 @@ namespace JwtAuth.Data
         {
         }
 
-        // Create the Users table
+        // Create the tables
         public DbSet<User> Users { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<BlacklistedToken> BlacklistedTokens { get; set; }
+        public DbSet<Video> Videos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -32,6 +33,21 @@ namespace JwtAuth.Data
                 .WithMany(u => u.RefreshTokens)
                 .HasForeignKey(t => t.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Configure Video entity
+            modelBuilder.Entity<Video>()
+                .HasKey(v => v.Id);
+
+            modelBuilder.Entity<Video>()
+                .Property(v => v.Format)
+                .HasConversion<string>();
+
+            // Configure foreign key relationship
+            modelBuilder.Entity<Video>()
+                .HasOne(v => v.User)
+                .WithMany(u => u.Videos)
+                .HasForeignKey(v => v.UserId)
+                .IsRequired();
 
             // Configure BlacklistedToken entity
             modelBuilder.Entity<BlacklistedToken>()

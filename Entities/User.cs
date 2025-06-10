@@ -10,6 +10,7 @@
         public string? Provider { get; set; } // "Local", "Google", "GitHub"
         public string? ProviderId { get; set; } // Unique ID from OAuth provider
         public List<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>(); // Navigation property
+        public List<Video> Videos { get; set; } = new List<Video>();
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }
